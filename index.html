@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Duhan Aslan Şafak - HUD Full Data</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { 
+            --neon: #00ff41; 
+            --danger: #ff3e3e; 
+            --info: #00d4ff; 
+            --warning: #f1c40f;
+            --bg: #050505; 
+            --panel-bg: rgba(10, 10, 10, 0.95);
+        }
+
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100dvh; /* iPhone uyumlu dinamik yükseklik */
+            text-transform: uppercase;
+            overflow: hidden; /* Kayma sorunları için */
+        }
+
+        body::before {
+            content: " ";
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(0, 255, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            background-size: 100% 4px, 3px 100%;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .map-panel { 
+            width: 100%;
+            height: 40vh; 
+            position: relative; 
+            border-bottom: 3px solid var(--neon);
+            filter: brightness(0.9) contrast(1.1);
+            flex-shrink: 0;
+        }
+        #map { width: 100%; height: 100%; background: #000; }
+
+        .radar-hattı {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(transparent, rgba(0, 255, 65, 0.1), transparent);
+            background-size: 100% 100px;
+            animation: radarTara 4s linear infinite;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        @keyframes radarTara { 0% { background-position: 0 -100px; } 100% { background-position: 0 40vh; } }
+
+        .bilgi-ekrani { 
+            position: absolute; 
+            bottom: 10px; 
+            left: 10px; 
+            right: 10px; 
+            background: rgba(0, 0, 0, 0.85); 
+            padding: 10px; 
+            z-index: 1000;
+            border-left: 4px solid var(--neon);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px); /* Safari desteği */
+        }
+
+        #il-adi { margin: 0; font-size: 18px; color: var(--neon); }
+        #city-desc { margin-top: 5px; font-size: 10px; color: #aaa; text-transform: none; line-height: 1.2; }
+
+        .data-container {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-bottom: 40px; /* iPhone alt bar payı */
+        }
+
+        .bar-section {
+            background: var(--panel-bg);
+            padding: 10px;
+            border: 1px solid #1a1a1a;
+        }
+
+        .bar-label { display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; color: var(--neon); }
+        .bar-bg { height: 8px; background: #000; border: 1px solid #333; margin-bottom: 8px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 1s ease-in-out; }
+
+        .safak-display {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #1a1a1a;
+        }
+
+        .big-safak { 
+            font-size: 70px; 
+            font-weight: 900; 
+            color: var(--neon); 
+            margin: 0; 
+            line-height: 1;
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+        }
+        .card { 
+            background: #0a0a0a; 
+            padding: 12px; 
+            border: 1px solid #1a1a1a;
+        }
+        .card label { display: block; font-size: 8px; color: #666; margin-bottom: 4px; }
+        .card span { font-size: 16px; font-weight: bold; color: #eee; }
+
+    </style>
+</head>
+<body>
+
+    <div class="map-panel">
+        <div class="radar-hattı"></div>
+        <div id="map"></div>
+        <div class="bilgi-ekrani">
+            <h2 id="il-adi">SİSTEM AKTİF...</h2>
+            <div id="city-desc">Veri paketleri yükleniyor...</div>
+        </div>
+    </div>
+
+    <div class="data-container">
+        <div class="bar-section">
+            <div class="bar-label"><span>TOPLAM İLERLEME</span><span id="p-percent">0%</span></div>
+            <div class="bar-bg"><div id="p-bar" class="bar-fill" style="background: var(--neon);"></div></div>
+            
+            <div class="bar-label" style="color:var(--info)"><span>HAFTALIK DÖNGÜ</span><span id="week-percent">0%</span></div>
+            <div class="bar-bg" style="height:4px"><div id="week-bar" class="bar-fill" style="background: var(--info);"></div></div>
+        </div>
+
+        <div class="safak-display">
+            <h1 class="big-safak" id="ana-safak">--</h1>
+            <div style="font-size: 11px; color: #555;" id="atarsa">YARIN: --</div>
+        </div>
+
+        <div class="grid" id="time-grid"></div>
+        <div style="font-size: 9px; color: #222; text-align: center; margin-top: 10px;">> terminal_user: DUHAN ASLAN</div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Verileriniz korundu...
+        const sehirVerileri = {1:"Adana: Torosların eteğinde tarım ve sanayinin buluştuğu, kebabı ve şalgamıyla ünlü gastronomi devi.",2:"Adıyaman: Kommagene Krallığı'nın dev heykelleriyle taçlanan Nemrut Dağı and kadim Mezopotamya mirası.",3:"Afyonkarahisar: Şifalı termal suları, dünya markası mermer endüstrisi, sucuk ve kaymağın lezzet merkezi.",4:"Ağrı: Nuh'un Gemisi efsanesine ev sahipliği yapan Ağrı Dağı ve mimari şaheser İshak Paşa Sarayı.",5:"Amasya: Yeşilırmak kenarına dizili Osmanlı konakları, Ferhat ile Şirin efsanesi ve Şehzadeler şehri.",6:"Ankara: Milli mücadelenin stratejik kalbi, Cumhuriyet'in sembolü Anıtkabir ve modern yönetim merkezi.",7:"Antalya: Turkuaz kıyıları, Likya ve Roma dönemine ait antik kentleri ile Akdeniz'in turizm başkenti.",8:"Artvin: Macahel ve Çoruh Nehri ile şekillenen, dik yamaçlı vadiler ve uçsuz bucaksız yaylalar diyarı.",9:"Aydın: 'Dağlarından yağ, ovalarından bal akan', incirin anavatanı ve Efes'e komşu tarih kavşağı.",10:"Balıkesir: Kaz Dağları'nın oksijeni, Marmara ve Ege'nin mavi bayraklı plajlarıyla iki denizin sahibi.",11:"Bilecik: Söğüt'te filizlenen Osmanlı mirası, Şeyh Edebali'nin manevi iklimi ve mermer yatakları.",12:"Bingöl: Turnalar Gölü'ndeki doğa harikası yüzen adaları ve yüksek rakımlı bal üretimiyle Doğu'nun gizli cevheri.",13:"Bitlis: Van Gölü kıyısındaki tarihi dokusu, Selçuklu mezarlığı Ahlat ve Nemrut Krater Gölü'nün ev sahibi.",14:"Bolu: Abant ve Yedigöller'in büyüleyici manzarası, aşçılar diyarı Mengen ve ormanlar denizi.",15:"Burdur: Göller Yöresi'nin kalbi, 'Aşkların ve İmparatorların Şehri' Sagalassos ve Salda Gölü'nün turkuazı.",16:"Bursa: İpek yolu durağı, otomotiv sanayi devi, Osmanlı'nın ilk başkenti ve Uludağ'ın görkemi.",17:"Çanakkale: Troya efsanesinden Çanakkale Geçilmez destanına, tarihin seyrini değiştiren stratejik boğaz hattı.",18:"Çankırı: Yer altındaki devasa kaya tuzu mağaraları ve İç Anadolu'nun yaranlık kültürüyle harmanlanmış sakinliği.",19:"Çorum: Anadolu'nun en eski medeniyetlerinden Hitit İmparatorluğu'nun başkenti Hattuşa ve leblebi diyarı.",20:"Denizli: Pamukkale'nin beyaz travertenleri, Hierapolis antik kenti ve dünya çapındaki tekstil sanayisi.",21:"Diyarbakır: Binlerce yıllık surlar, Hevsel Bahçeleri ve Mezopotamya'nın çok kültürlü tarihi geçiş noktası.",22:"Edirne: Osmanlı'nın Balkan kapısı, Mimar Sinan'ın ustalık eseri Selimiye Camii ve Kırkpınar efsanesi.",23:"Elazığ: Hazar Gölü'nün maviliği, Harput Kalesi'nin kadim tarihi ve Gakkoşların misafirperver diyarı.",24:"Erzincan: Munzur dağlarının gölgesinde, bakır işlemeciliği ve tulum peyniriyle ünlü dirençli kent.",25:"Erzurum: Palandöken'in kış turizmi, Çifte Minareli Medrese'nin Selçuklu sanatı ve Dadaşların yiğit kültürü.",26:"Eskişehir: Porsuk Çayı etrafındaki modern yaşamı, lületaşı ve üniversite kenti kimliğiyla Anadolu'nun Avrupai yüzü.",27:"Gaziantep: UNESCO tescilli mutfağı, fıstığı, baklavası ve dünyanın en büyük mozaik müzelerinden Zeugma.",28:"Giresun: Mavi ile yeşilin kucaklaştığı, dünyanın en kaliteli fındığının yetiştiği Karadeniz'in tek adalı şehri.",29:"Gümüşhane: Karaca Mağarası'nın sarkıtları, Zigana'nın geçitleri ve geleneksel pestil-köme üretimi.",30:"Hakkari: Cilo-Sat Dağları'nın buzulları, Zap Suyu'nun hırçın akışı ve el değmemiş görkemli doğa.",31:"Hatay: İlk kiliseden eski camilere uzanan hoşgörü iklimi, zengin mozaik arşivi ve eşsiz künefesi.",32:"Isparta: Lavanta bahçeleri, gül yağının dünya merkezi ve Eğirdir Gölü ile doğanın renk paleti.",33:"Mersin: Türkiye'nin en büyük limanlarından biri, Tarsus'un inanç turizmi ve palmiyeli sahil şeridi.",34:"İstanbul: İki kıtayı birleştiren, Bizans ve Osmanlı mirasıyla dünya tarihine yön veren mega metropol.",35:"İzmir: Modern yaşamın, Kordon boyunun ve Efes-Bergama gibi dünya mirası antik limanların Ege incisi.",36:"Kars: Rus mimarisinin izleri, kışın donan Çıldır Gölü ve orta çağ şehri Ani Harabeleri'nin büyüsü.",37:"Kastamonu: Küre ve Ilgaz Dağları'nın heybeti, ahşap sivil mimarisi ve kanyonlarıyla doğa tutkunlarının adresi.",38:"Kayseri: Erciyes'in zirvesi, ticaretin genetiği, pastırma ve mantının lezzet durağı olan sanayi merkezi.",39:"Kırklareli: Istranca Dağları'nın ekosistemi, Dupnisa Mağarası ve Balkan kültürünün Trakya'daki izleri.",40:"Kırşehir: Bozkırın tezenesi Neşet Ertaş'ın vatanı, Ahilik teşkilatının temeli ve ozanlar diyarı.",41:"Kocaeli: Gebze-İzmit hattındaki dev sanayi tesisleri, Pişmaniyesi ve Marmara'nın lojistik kalbi.",42:"Konya: Mevlana'nın 'Gel' çağrısı, Selçuklu başkentliği ve uçsuz bucaksız Anadolu buğday ambarı.",43:"Kütahya: Çini sanatının zirvesi, Frig Vadisi'nin gizemi ve porselen endüstrisinin dünyadaki sesi.",44:"Malatya: Güneşte kuruyan altın renkli kayısıları ve Arslantepe Höyüğü ile insanlık tarihinin köklü şehri.",45:"Manisa: Şehzadelerin yetiştiği saray şehri, Spil Dağı'nın mitolojisi ve dünyaca ünlü Sultaniye üzümü.",46:"Kahramanmaraş: Kurtuluş Savaşı'nın madalyalı şehri, keçi sütlü dondurması ve çelik mutfak eşyaları sanayi.",47:"Mardin: Mezopotamya'ya bakan taş evler, dar sokaklar ve farklı dinlerin huzurla yaşadığı müze şehir.",48:"Muğla: Bodrum'dan Fethiye'ye uzanan koylar, turizm cenneti tatil beldeleri ve mermer ocakları.",49:"Muş: Anadolu'nun kapılarını açan Malazgirt Ovası, bahar aylarında açan laleleri ve köklü tarih mirası.",50:"Nevşehir: Peri bacalarının masalsı görünümü, yer altı şehirleri ve sıcak hava balonlarıyla Kapadokya.",51:"Niğde: Aladağlar'ın zirveleri, patates üretimindeki liderliği ve Roma döneminden kalan Gümüşler Manastırı.",52:"Ordu: Boztepe'den izlenen eşsiz manzara, fındık bahçeleri ve Karadeniz'in en uzun sahil şeridenlerinden biri.",53:"Rize: Dik yamaçlardaki çay bahçeleri, Kaçkar Dağları'nın yayla kültürü ve hırçın Karadeniz'in enerjisi.",54:"Sakarya: Sapanca Gölü'nün doğası, otomotiv ve vagon sanayisinin merkezi, tarımın bereketli toprakları.",55:"Samsun: 19 Mayıs ruhunun doğduğu liman kenti, Amazon kadınları efsanesi ve Karadeniz'in ticaret merkezi.",56:"Siirt: Tillo'nun manevi iklimi, Büryan kebabı ve kendine has tadıyla bilinen Siirt fıstığı.",57:"Sinop: Türkiye'nin en kuzeyindeki İnceburun, doğal limanı ve tarihi kale cezaeviyle sakin bir liman şehri.",58:"Sivas: Gök Medrese'nin ihtişamı, Cumhuriyet Kongresi'ne ev sahipliği ve Selçuklu taş işçiliği.",59:"Tekirdağ: Marmara kıyısındaki bağ yolları, meşhur köftesi ve Balkanlar ile kurulan lojistik bağ.",60:"Tokat: Ballıca Mağarası'nın doğa mucizesi, 900 adımda 900 yıllık tarih ve yazmacılık el sanatı.",61:"Trabzon: Sümela Manastırı'nın sarp kayalardaki duruşu, bordo-mavi tutkusu ve Karadeniz'in metropolü.",62:"Tunceli: Munzur Çayı'nın kutsal sayılan gözeleri, biyolojik çeşitliliği ve korunmuş doğal yaşam alanı.",63:"Şanlıurfa: 'Tarihin Sıfır Noktası' Göbeklitepe, Balıklıgöl efsanesi ve peygamberler şehri maneviyatı.",64:"Uşak: Dünyanın en büyük kanyonlarından Ulubey, Karun Hazineleri ve Türkiye'nin ilk sanayi atılımları.",65:"Van: 'Dünyada Van, ahirette iman' sözüyle anılan gölü, Akdamar Kilisesi ve eşsiz kahvaltı kültürü.",66:"Yozgat: Türkiye'nin ilk milli parkı Çamlık, Roma Hamamı ve İç Anadolu'nun samimi misafirperverliği.",67:"Zonguldak: Yerin metrelerce altındaki taş kömürü havzaları, emeğin ve alın terinin kara elmas şehri.",68:"Aksaray: Ihlara Vadisi'nin derinliği, Selçuklu kervansarayları ve Hasan Dağı'nın görkemli silüeti.",69:"Bayburt: Çoruh Nehri'nin kıyısında yükselen kalesi ve modern sanatın zirvesi Baksı Müzesi.",70:"Karaman: Karamanoğlu Mehmet Bey'in Türkçeyi resmi dil ilan ettiği dilin ve tarihin merkezi.",71:"Kırıkkale: Makine Kimya Endüstrisi ile şekillenen savunma sanayi kenti ve İç Anadolu'nun kilit kavşağı.",72:"Batman: Raman Dağı'nda bulunan ilk petrolün hikayesi ve Hasankeyf'in binlerce yıllık kadim mirası.",73:"Şırnak: Cudi Dağı'nın Nuh efsanesindeki yeri ve Habur Sınır Kapısı ile Ortadoğu'ya açılan ticaret yolu.",74:"Bartın: Fatih Sultan Mehmet'in 'Çeşm-i Cihan' dediği Amasra ve ahşap kadırga yapımı geleneği.",75:"Ardahan: Çıldır Gölü üzerinde buz balıkçılığı, yüksek rakımlı yaylaları ve tarihi kaleleri.",76:"Iğdır: Ağrı Dağı'nın yamacında üç ülkeyle sınır, mikroklima iklimiyle Doğu'nun meyve bahçesi.",77:"Yalova: Termal tesislerinin şifası, Atatürk'ün 'Yürüyen Köşk'ü ve Marmara'nın sahil bahçesi.",78:"Karabük: UNESCO mirası Safranbolu evleri ve Türkiye'nin ağır sanayi lokomotifi demir-çelik fabrikaları.",79:"Kilis: Suriye sınırında zeytincilik, üzüm bağları ve kendine has mutfağıyla bilinen sınır kenti.",80:"Osmaniye: Kaleler şehri olarak anılan, Çukurova'nın verimli topraklarında yer fıstığı üretim merkezi.",81:"Düzce: Karadeniz'in dalgaları ile Bolu'nun ormanları arasında kalan, şelaleler ve rafting parkurları diyarı."};
+        const koordVerileri = {1:[36.9914,35.3308],2:[37.7648,38.2786],3:[38.7507,30.5567],4:[39.7225,43.0561],5:[40.6499,35.8353],6:[39.9334,32.8597],7:[36.8841,30.7056],8:[41.1828,41.8183],9:[37.8444,27.8458],10:[39.6484,27.8826],11:[40.1426,29.9795],12:[38.8855,40.4966],13:[38.3938,42.1232],14:[40.735,31.608],15:[37.7203,30.2908],16:[40.1826,29.066],17:[40.1467,26.4086],18:[40.6013,33.6134],19:[40.5506,34.9556],20:[37.7765,29.0864],21:[37.9144,40.211],22:[41.6768,26.557],23:[38.681,39.2264],24:[39.75,39.5],25:[39.9,41.27],26:[39.7767,30.5206],27:[37.0662,37.3833],28:[40.9128,38.3895],29:[40.4608,39.4814],30:[37.5744,43.7408],31:[36.2023,36.1606],32:[37.7644,30.5522],33:[36.8121,34.6415],34:[41.0082,28.9784],35:[38.4237,27.1428],36:[40.6019,43.095],37:[41.3766,33.7765],38:[38.7205,35.4826],39:[41.7333,27.2167],40:[39.1425,34.1709],41:[40.7654,29.9408],42:[37.8714,32.4921],43:[39.4242,29.9833],44:[38.3552,38.3095],45:[38.6191,27.4289],46:[37.5833,36.9333],47:[37.3129,40.7339],48:[37.2153,28.3636],49:[38.7432,41.5064],50:[38.6244,34.7144],51:[37.9667,34.6833],52:[40.9839,37.8741],53:[41.0201,40.5234],54:[40.7569,30.3783],55:[41.2867,36.33],56:[37.9333,41.95],57:[42.0231,35.1531],58:[39.7477,37.0179],59:[40.9781,27.511],60:[40.3167,36.55],61:[41.0027,39.7167],62:[39.1079,39.5401],63:[37.1591,38.7969],64:[38.6823,29.4082],65:[38.4891,43.38],66:[39.8181,34.8147],67:[41.4564,31.7987],68:[38.3687,34.037],69:[40.2552,40.2249],70:[37.1759,33.2287],71:[39.8468,33.5153],72:[37.8812,41.1351],73:[37.5164,42.4611],74:[41.6344,32.3375],75:[41.1105,42.7022],76:[39.9237,44.0436],77:[40.6551,29.2769],78:[41.2061,32.6204],79:[36.7184,37.1212],80:[37.0741,36.2473],81:[40.8438,31.1565]};
+        const sehirIsimleri = ["", "Adana", "Adıyaman", "Afyon", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "K.Maraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"];
+
+        // Değişkenleri global tanımlıyoruz
+        let map;
+        const birimler = [{l:"GÜN",id:"gun",d:86400000},{l:"HAFTA",id:"hafta",d:604800000},{l:"SAAT",id:"saat",d:3600000},{l:"DAKİKA",id:"dakika",d:60000}];
+
+        // iPhone için güvenli başlatma
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Harita Başlatma
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView([39.0, 35.0], 5);
+            L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}').addTo(map);
+
+            const grid = document.getElementById('time-grid');
+            birimler.forEach(u => {
+                grid.innerHTML += `<div class="card"><label>KALAN_${u.l}</label><span id="k-${u.id}">0</span></div>
+                                   <div class="card"><label>GEÇEN_${u.l}</label><span id="g-${u.id}">0</span></div>`;
+            });
+
+            // İlk güncellemeyi yap ve döngüyü başlat
+            update();
+            setInterval(update, 1000);
+
+            // iPhone harita yükleme hatasını önleme
+            setTimeout(() => { map.invalidateSize(); }, 500);
+        });
+
+        function update() {
+            if(!map) return; // Map hazır değilse çalışma
+
+            const baslangic = new Date("2025-12-16T00:00:00").getTime();
+            const bitis = new Date("2026-06-08T00:00:00").getTime();
+            const simdi = new Date().getTime();
+            
+            let farkK = Math.max(0, bitis - simdi);
+            let farkG = simdi - baslangic;
+            let toplam = bitis - baslangic;
+            
+            let p = (farkG / toplam) * 100;
+            let kG = Math.ceil(farkK / 86400000);
+            let haftaP = 100 - ((farkK % 604800000) / 604800000 * 100);
+
+            document.getElementById("ana-safak").innerText = String(kG).padStart(2, '0');
+            document.getElementById("atarsa").innerText = "YARIN: " + (kG > 0 ? String(kG - 1).padStart(2, '0') : "00");
+            document.getElementById("p-bar").style.width = p.toFixed(2) + "%";
+            document.getElementById("p-percent").innerText = p.toFixed(2) + "%";
+            document.getElementById("week-bar").style.width = haftaP.toFixed(2) + "%";
+            document.getElementById("week-percent").innerText = haftaP.toFixed(0) + "%";
+
+            birimler.forEach(u => {
+                document.getElementById("k-"+u.id).innerText = Math.floor(farkK/u.d);
+                document.getElementById("g-"+u.id).innerText = Math.floor(farkG/u.d);
+            });
+
+            if (kG >= 1 && kG <= 81) {
+                const cityName = sehirIsimleri[kG];
+                const cityPos = koordVerileri[kG];
+                
+                if (document.getElementById("il-adi").innerText !== "HEDEF: " + cityName.toUpperCase()) {
+                    document.getElementById("il-adi").innerText = "HEDEF: " + cityName.toUpperCase();
+                    document.getElementById("city-desc").innerText = "> DATA: " + (sehirVerileri[kG]);
+                    map.flyTo(cityPos, 10, { duration: 3 });
+                }
+            } else {
+                if (document.getElementById("il-adi").innerText !== "TARAMA MODU") {
+                    document.getElementById("il-adi").innerText = "TARAMA MODU";
+                    document.getElementById("city-desc").innerText = "> BEKLEMEDE: Stratejik operasyon süresi dışında.";
+                    if (map.getZoom() > 6) map.flyTo([39.0, 35.0], 5);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
