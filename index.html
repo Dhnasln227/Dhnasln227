@@ -1,72 +1,1217 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sonsuzluğa Söz Verdik</title>
+    <title>Ağ & Sistem Uzmanlığı Günlük Rutin ve Eğitim Planı (BYINTEK P70 Modu)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,700&family=Quicksand:wght@300;400&display=swap');
-
-        body { 
-            margin: 0; background: #faf3ef; color: #4a3728; 
-            font-family: 'Quicksand', sans-serif; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; min-height: 100vh; 
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: rgba(22, 27, 34, 0.85);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #a855f7;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
         }
 
-        .hero { text-align: center; padding: 20px; animation: slideIn 1.5s ease-out; }
-        .names { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin: 10px 0; color: #8b4513; }
-        .romantic-quote { font-style: italic; font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6; }
-
-        .btn-group { display: flex; flex-direction: column; gap: 12px; width: 280px; }
-        .btn { 
-            background: #fff; border: 1px solid #c9b0a1; color: #8b4513; 
-            padding: 14px; cursor: pointer; transition: 0.3s; border-radius: 8px; font-size: 0.9rem;
+        /* BYINTEK P70 PROJEKSİYON ÖZEL ULTRA OPTİMİZASYON */
+        body.projection-mode {
+            --bg-color: #000000 !important;
+            --card-bg: #030407 !important;
+            --card-border: rgba(56, 189, 248, 0.4) !important;
+            --text-main: #ffffff !important;
+            --text-muted: #cbd5e1 !important;
+            --accent-blue: #38bdf8 !important;
+            --accent-green: #4ade80 !important;
+            background-image: none !important;
+            font-size: 1.2rem;
         }
-        .btn:hover { background: #8b4513; color: #fff; box-shadow: 0 4px 15px rgba(139, 69, 19, 0.2); }
 
-        #modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); justify-content: center; align-items: center; z-index: 20; }
-        .m-card { background: #fff; padding: 35px; border-radius: 20px; text-align: center; max-width: 80%; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        
-        @keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        body.projection-mode .container {
+            max-width: 100% !important;
+            padding: 10px;
+        }
+
+        body.projection-mode .clock-box h1 {
+            font-size: 3.5rem !important;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .container {
+                grid-template-columns: 1.8fr 1.2fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            margin-bottom: 20px;
+        }
+
+        .header-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .clock-box h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--accent-blue);
+        }
+
+        .clock-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* ALARM BANNERİ */
+        .alarm-banner {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--accent-red);
+            border-radius: 14px;
+            padding: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            animation: alarmPulse 1s infinite alternate;
+            margin-bottom: 20px;
+        }
+
+        .alarm-banner.active {
+            display: flex;
+        }
+
+        @keyframes alarmPulse {
+            0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+            100% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.8); }
+        }
+
+        .btn-stop-alarm {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);
+        }
+
+        /* LİSTE VE BÖLÜMLER */
+        .section-title {
+            font-size: 1.05rem;
+            color: var(--accent-blue);
+            margin: 15px 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scroll-area {
+            max-height: 550px;
+            overflow-y: auto;
+            padding-right: 5px;
+            scroll-behavior: smooth;
+        }
+
+        .routine-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .routine-item.active-pomo-row {
+            border-color: var(--accent-purple);
+            background: rgba(168, 85, 247, 0.15);
+            box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+        }
+
+        .routine-item.completed {
+            opacity: 0.45;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .routine-item.completed .item-title {
+            text-decoration: line-through;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-time {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--accent-purple);
+            background: rgba(168, 85, 247, 0.12);
+            padding: 4px 8px;
+            border-radius: 6px;
+            min-width: 85px;
+            text-align: center;
+        }
+
+        .item-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .check-btn {
+            background: transparent;
+            border: 2px solid var(--card-border);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .routine-item.completed .check-btn {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: #000;
+        }
+
+        /* POMODORO KARTI */
+        .pomodoro-card {
+            text-align: center;
+        }
+
+        .pomo-timer {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 10px 0;
+            letter-spacing: 2px;
+            color: var(--accent-purple);
+        }
+
+        .pomo-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        /* BUTONLAR VE İSTATİSTİK */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: #000;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            width: 100%;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--card-border);
+            padding: 10px 6px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .switch-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.85rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #374151; transition: .3s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .3s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* SEKMELER (TABS) */
+        .tab-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #000;
+            border-color: var(--accent-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .audio-test-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--card-border);
+        }
     </style>
 </head>
-<body>
+<body id="body">
 
-    <div class="hero">
-        <div style="letter-spacing: 3px; opacity: 0.7;">BİZİM HİKAYEMİZ</div>
-        <div class="names">Sinan & Rabia</div>
-        <div class="romantic-quote">
-            "İki kalbin birleştiği o en kıymetli ana,<br>
-            tüm sevdamızla sizi de bekliyoruz..."
+<div class="container">
+    <!-- SOL KOLON: SEKMEDELİ İÇERİK -->
+    <div>
+        <div class="card header-card">
+            <div class="clock-box">
+                <h1 id="clock">00:00:00</h1>
+                <p id="date-display">Yükleniyor...</p>
+            </div>
+            <div class="top-controls">
+                <button class="btn btn-primary" id="projection-toggle-btn" title="BYINTEK P70 Projeksiyon Modu">
+                    <i data-lucide="projector"></i> P70 Modu
+                </button>
+            </div>
+        </div>
+
+        <!-- ALARM BANNERİ -->
+        <div class="alarm-banner" id="alarm-banner">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i data-lucide="bell-ring" style="color: white; width: 32px; height: 32px;"></i>
+                <div>
+                    <strong style="font-size:1.1rem; color:white;">Süre Doldu!</strong>
+                    <p style="font-size:0.85rem; color: #fecaca;">Alarm çalıyor. Alarmı kapatabilirsin.</p>
+                </div>
+            </div>
+            <button class="btn-stop-alarm" id="btn-stop-alarm">
+                <i data-lucide="volume-x"></i> Alarmı Durdur
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="tab-header">
+                <button class="tab-btn active" onclick="switchTab('routine')"><i data-lucide="clock"></i> Günlük Rutin (Pomodoro Bölümlü)</button>
+                <button class="tab-btn" onclick="switchTab('courses')"><i data-lucide="book-open"></i> Eğitim Planı (157 Ders)</button>
+            </div>
+
+            <div id="tab-routine" class="tab-content active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="color: var(--accent-blue);">Pazartesi / Pomodoro Akışı</h3>
+                    <button class="btn" id="reset-routine-btn" style="padding: 4px 10px; font-size: 0.8rem;"><i data-lucide="rotate-ccw"></i> Rutini Sıfırla</button>
+                </div>
+                <div class="scroll-area" id="routine-container"></div>
+            </div>
+
+            <div id="tab-courses" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="color: var(--accent-blue);">Tüm Modül ve Dersler</h3>
+                    <button class="btn" id="reset-courses-btn" style="padding: 4px 10px; font-size: 0.8rem;"><i data-lucide="rotate-ccw"></i> Eğitimleri Sıfırla</button>
+                </div>
+                <div class="scroll-area" id="course-container"></div>
+            </div>
         </div>
     </div>
 
-    <div class="btn-group">
-        <button class="btn" onclick="show('ÇEYİZ', 'Mutluluk dolu yuvamızın hazırlığına bekliyoruz.', '21 Haziran 2026, Pazar | Saat: 13.00', false, '')">ÇEYİZ</button>
-        <button class="btn" onclick="show('KINA', 'Geleneksel bir akşamın sıcaklığında buluşalım.', '03 Temmuz 2026, Cuma | 20.00-23.00<br>Yılmazlar Plaza Salon Yıldız', true, 'https://maps.app.goo.gl/fkNWfCkF4hN1bVz18?g_st=ac')">KINA</button>
-        <button class="btn" onclick="show('DÜĞÜN', 'Hayatımızın en özel gününde şahidimiz olun.', '05 Temmuz 2026, Pazar | 16.00-19.00<br>Yılmazlar Plaza Salon Yıldız', true, 'https://maps.app.goo.gl/fkNWfCkF4hN1bVz18?g_st=ac')">DÜĞÜN</button>
-    </div>
+    <!-- SAĞ KOLON: AKILLI POMODORO VE İSTATİSTİKLER -->
+    <div>
+        <div class="card pomodoro-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3><i data-lucide="timer"></i> Akıllı Pomodoro</h3>
+                <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600;">Hazır</span>
+            </div>
+            <div class="pomo-timer" id="pomo-display">25:00</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Saate göre anlık senkronize çalışır.</p>
+            <div class="pomo-controls">
+                <button class="btn btn-primary" id="pomo-start-btn"><i data-lucide="play"></i> Başlat</button>
+                <button class="btn" id="pomo-reset-btn"><i data-lucide="rotate-ccw"></i> Sıfırla</button>
+            </div>
+        </div>
 
-    <div id="modal" onclick="this.style.display='none'">
-        <div class="m-card">
-            <h2 id="m-title" style="color:#8b4513; font-family: 'Playfair Display', serif;"></h2>
-            <p id="m-desc" style="font-style: italic; margin-bottom: 15px;"></p>
-            <p id="m-body" style="font-weight: bold;"></p>
-            <button id="loc-btn" class="btn" style="margin-top:20px; display:none;" onclick="openMap()">HARİTADA GÖSTER</button>
+        <div class="card">
+            <h3><i data-lucide="bar-chart-3"></i> Genel İlerleme Durumu</h3>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-routine-rate">0%</div>
+                    <div class="stat-label">Günlük Rutin</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-completed-count">0 / 157</div>
+                    <div class="stat-label">Dersler</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-rate">0%</div>
+                    <div class="stat-label">Genel Başarı</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                    <span>Ders İlerleme Oranı</span>
+                    <span id="progress-text">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="switch-box">
+                <span><i data-lucide="volume-2"></i> Sesli Uyarılar</span>
+                <label class="switch">
+                    <input type="checkbox" id="sound-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="audio-test-row">
+                <button class="btn" id="test-notif-btn" style="flex: 1; justify-content: center;"><i data-lucide="play"></i> Bildirim Test</button>
+                <button class="btn" id="test-alarm-btn" style="flex: 1; justify-content: center;"><i data-lucide="play"></i> Alarm Test</button>
+            </div>
+
+            <button class="btn btn-danger" id="clear-all-btn" style="margin-top: 15px;">
+                <i data-lucide="trash-2"></i> Tüm Verileri Sıfırla
+            </button>
         </div>
     </div>
+</div>
 
-    <script>
-        let currentMapLink = '';
-        function show(t, d, b, showLoc, mapLink) {
-            document.getElementById('m-title').innerText = t;
-            document.getElementById('m-desc').innerText = d;
-            document.getElementById('m-body').innerHTML = b;
-            currentMapLink = mapLink;
-            document.getElementById('loc-btn').style.display = showLoc ? 'block' : 'none';
-            document.getElementById('modal').style.display = 'flex';
+<script>
+    let activeAlarmAudio = null;
+    let isAlarmPlaying = false;
+
+    function playAudio(type = 'notif') {
+        const soundEnabled = document.getElementById('sound-toggle').checked;
+        if (!soundEnabled) return;
+
+        const fileName = (type === 'alarm') ? 'alarm.mp3' : 'bildirim.mp3';
+
+        try {
+            const audio = new Audio(fileName);
+            if (type === 'alarm') {
+                if (isAlarmPlaying) return;
+                isAlarmPlaying = true;
+                activeAlarmAudio = audio;
+
+                audio.play().catch(err => {
+                    console.log("Alarm çalınamadı:", err);
+                    isAlarmPlaying = false;
+                });
+
+                audio.onended = () => {
+                    isAlarmPlaying = false;
+                    if (document.getElementById('alarm-banner').classList.contains('active')) {
+                        setTimeout(() => {
+                            if (document.getElementById('alarm-banner').classList.contains('active')) {
+                                playAudio('alarm');
+                            }
+                        }, 3000);
+                    }
+                };
+            } else {
+                audio.play().catch(err => console.log("Bildirim çalınamadı:", err));
+            }
+        } catch (e) {
+            console.log("Ses hatası:", e);
+            if (type === 'alarm') isAlarmPlaying = false;
         }
-        function openMap() { window.open(currentMapLink); }
-    </script>
+    }
+
+    document.getElementById('test-notif-btn').addEventListener('click', () => playAudio('notif'));
+    document.getElementById('test-alarm-btn').addEventListener('click', () => {
+        document.getElementById('alarm-banner').classList.add('active');
+        playAudio('alarm');
+    });
+
+    function triggerPersistentAlarm() {
+        document.getElementById('alarm-banner').classList.add('active');
+        playAudio('alarm');
+    }
+
+    document.getElementById('btn-stop-alarm').addEventListener('click', () => {
+        document.getElementById('alarm-banner').classList.remove('active');
+        if (activeAlarmAudio) {
+            activeAlarmAudio.pause();
+            activeAlarmAudio = null;
+        }
+        isAlarmPlaying = false;
+    });
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        if (tabName === 'routine') {
+            document.getElementById('tab-routine').classList.add('active');
+            event.currentTarget.classList.add('active');
+            scrollToActiveRoutine();
+        } else {
+            document.getElementById('tab-courses').classList.add('active');
+            event.currentTarget.classList.add('active');
+            scrollToLastCourse();
+        }
+        lucide.createIcons();
+    }
+
+    // RUTİN BLOKLARI
+    const routineBlocks = [
+        { title: "Sabah Hazırlığı", items: [
+            { id: 'r1', type: 'normal', time: "07:00 - 07:30", title: "Uyanış ve Egzersiz (10 Şınav, 10 Mekik)", completed: false },
+            { id: 'r2', type: 'normal', time: "07:30 - 08:30", title: "Kahvaltı & Güne Hazırlık", completed: false }
+        ]},
+        { title: "Blok 1 (Temel Bilimler / Linux & Ağ)", items: [
+            { id: 'r3', type: 'pomo', duration: 25, time: "08:30 - 08:55", title: "Pomo 1: Odaklanma & Çalışma", completed: false },
+            { id: 'r4', type: 'break', duration: 5, time: "08:55 - 09:00", title: "Mola 1: Kısa Dinlenme", completed: false },
+            { id: 'r5', type: 'pomo', duration: 25, time: "09:00 - 09:25", title: "Pomo 2: Çalışmaya Devam", completed: false },
+            { id: 'r6', type: 'break', duration: 5, time: "09:25 - 09:30", title: "Mola 2: Kısa Dinlenme", completed: false },
+            { id: 'r7', type: 'pomo', duration: 25, time: "09:30 - 09:55", title: "Pomo 3: Konu Pratiği", completed: false },
+            { id: 'r8', type: 'break', duration: 5, time: "09:55 - 10:00", title: "Mola 3: Kısa Dinlenme", completed: false },
+            { id: 'r9', type: 'pomo', duration: 25, time: "10:00 - 10:25", title: "Pomo 4: Çalışma Oturumu", completed: false },
+            { id: 'r10', type: 'break', duration: 15, time: "10:25 - 10:40", title: "Uzun Mola & Esneme (15 Dk)", completed: false },
+            { id: 'r11', type: 'pomo', duration: 25, time: "10:40 - 11:05", title: "Pomo 5: Çalışma Oturumu", completed: false },
+            { id: 'r12', type: 'break', duration: 5, time: "11:05 - 11:10", title: "Mola 5: Kısa Dinlenme", completed: false },
+            { id: 'r13', type: 'pomo', duration: 25, time: "11:10 - 11:35", title: "Pomo 6: Çalışma Oturumu", completed: false },
+            { id: 'r14', type: 'break', duration: 5, time: "11:35 - 11:40", title: "Mola 6: Kısa Dinlenme", completed: false },
+            { id: 'r15', type: 'pomo', duration: 25, time: "11:40 - 12:05", title: "Pomo 7: Blok Kapanış Çalışması", completed: false },
+            { id: 'r16', type: 'normal', time: "12:05 - 12:30", title: "Blok Özeti ve Toparlanma", completed: false }
+        ]},
+        { title: "Öğle Arası", items: [
+            { id: 'r17', type: 'normal', time: "12:30 - 13:30", title: "Öğle Arası ve Dinlenme", completed: false }
+        ]},
+        { title: "Blok 2 (Uygulamalı Çalışma / Lab)", items: [
+            { id: 'r18', type: 'pomo', duration: 25, time: "13:30 - 13:55", title: "Pomo 1: Lab Ortamı Kurulumu", completed: false },
+            { id: 'r19', type: 'break', duration: 5, time: "13:55 - 14:00", title: "Mola 1", completed: false },
+            { id: 'r20', type: 'pomo', duration: 25, time: "14:00 - 14:25", title: "Pomo 2: Komut Satırı Pratiği", completed: false },
+            { id: 'r21', type: 'break', duration: 5, time: "14:25 - 14:30", title: "Mola 2", completed: false },
+            { id: 'r22', type: 'pomo', duration: 25, time: "14:30 - 14:55", title: "Pomo 3: Uygulama Çalışması", completed: false },
+            { id: 'r23', type: 'break', duration: 5, time: "14:55 - 15:00", title: "Mola 3", completed: false },
+            { id: 'r24', type: 'pomo', duration: 25, time: "15:00 - 15:25", title: "Pomo 4: Uygulama Çalışması", completed: false },
+            { id: 'r25', type: 'break', duration: 15, time: "15:25 - 15:40", title: "Uzun Mola (15 Dk)", completed: false },
+            { id: 'r26', type: 'pomo', duration: 25, time: "15:40 - 16:05", title: "Pomo 5: Lab Senaryoları", completed: false },
+            { id: 'r27', type: 'break', duration: 5, time: "16:05 - 16:10", title: "Mola 5", completed: false },
+            { id: 'r28', type: 'pomo', duration: 25, time: "16:10 - 16:35", title: "Pomo 6: Lab Senaryoları", completed: false },
+            { id: 'r29', type: 'break', duration: 5, time: "16:35 - 16:40", title: "Mola 6", completed: false },
+            { id: 'r30', type: 'pomo', duration: 25, time: "16:40 - 17:05", title: "Pomo 7: Sorun Giderme", completed: false },
+            { id: 'r31', type: 'normal', time: "17:05 - 17:30", title: "Blok Sonu Değerlendirme", completed: false }
+        ]},
+        { title: "Akşamüstü", items: [
+            { id: 'r32', type: 'normal', time: "17:30 - 18:30", title: "Akşamüstü Molası ve Dinlenme", completed: false }
+        ]},
+        { title: "Blok 3 (Tekrar ve Proje Geliştirme)", items: [
+            { id: 'r33', type: 'pomo', duration: 25, time: "18:30 - 18:55", title: "Pomo 1: Günlük Konu Tekrarı", completed: false },
+            { id: 'r34', type: 'break', duration: 5, time: "18:55 - 19:00", title: "Mola 1", completed: false },
+            { id: 'r35', type: 'pomo', duration: 25, time: "19:00 - 19:25", title: "Pomo 2: Proje Geliştirme", completed: false },
+            { id: 'r36', type: 'break', duration: 5, time: "19:25 - 19:30", title: "Mola 2", completed: false },
+            { id: 'r37', type: 'pomo', duration: 25, time: "19:30 - 19:55", title: "Pomo 3: Proje Geliştirme", completed: false },
+            { id: 'r38', type: 'break', duration: 5, time: "19:55 - 20:00", title: "Mola 3", completed: false },
+            { id: 'r39', type: 'normal', time: "20:00 - 20:30", title: "Günlük Notlar ve Kapanış", completed: false }
+        ]},
+        { title: "Akşam Kapanışı", items: [
+            { id: 'r40', type: 'normal', time: "20:30 - 22:00", title: "Akşam Yemeği ve Serbest Zaman", completed: false },
+            { id: 'r41', type: 'normal', time: "22:00 - 23:00", title: "Günlük Değerlendirme ve Ertesi Gün Planı", completed: false },
+            { id: 'r42', type: 'normal', time: "23:00 - 07:00", title: "Yatış ve Dinlenme", completed: false }
+        ]}
+    ];
+
+    // EĞİTİM PLANI (157 DERS)
+    const courseModules = [
+        { title: "1. Giriş", items: [
+            { id: 1, time: "00:02:08", title: "1.1_Tanıtım", completed: true },
+            { id: 2, time: "00:07:49", title: "1.2_Bilgilendirme", completed: true }
+        ]},
+        { title: "2. Ağlar ve Katmanlı Yapı", items: [
+            { id: 3, time: "00:11:36", title: "2.1_Ağlara Giriş 1", completed: true },
+            { id: 4, time: "00:11:00", title: "2.2_Ağlara Giriş 2", completed: false },
+            { id: 5, time: "00:10:56", title: "2.3_Ağ Türleri 1", completed: false },
+            { id: 6, time: "00:11:39", title: "2.4_Ağ Türleri 2", completed: false },
+            { id: 7, time: "00:15:16", title: "2.5_İletişim Prensipleri", completed: false },
+            { id: 8, time: "00:04:14", title: "2.6_İletişim Referans Modelleri 1", completed: false },
+            { id: 9, time: "00:13:13", title: "2.7_İletişim Referans Modelleri 2", completed: false },
+            { id: 10, time: "00:07:47", title: "2.8_Uygulama Katmanı", completed: false },
+            { id: 11, time: "00:12:52", title: "2.9_Taşıma Katmanı 1", completed: false },
+            { id: 12, time: "00:10:10", title: "2.10_Taşıma Katmanı 2", completed: false },
+            { id: 13, time: "00:07:02", title: "2.11_Ağ Katmanı 1", completed: false },
+            { id: 14, time: "00:11:50", title: "2.12_Ağ Katmanı 2", completed: false },
+            { id: 15, time: "00:02:54", title: "2.13_Veri Bağlantısı Katmanı 1", completed: false },
+            { id: 16, time: "00:04:26", title: "2.14_Veri Bağlantısı Katmanı 2", completed: false },
+            { id: 17, time: "00:09:58", title: "2.15_Fiziksel Katman", completed: false },
+            { id: 18, time: "00:09:19", title: "2.16_Fiziksel Katman", completed: false }
+        ]},
+        { title: "3. Ağ Cihazlarının Temel Konfigürasyonu", items: [
+            { id: 19, time: "00:04:49", title: "3.1_Ağda Hiyerarşik Yapı", completed: false },
+            { id: 20, time: "00:05:29", title: "3.2_Uç Cihaz", completed: false },
+            { id: 21, time: "00:11:12", title: "3.3_Anahtar Cihaz", completed: false },
+            { id: 22, time: "00:15:00", title: "3.4_Anahtar Cihaz Temel Konfigürasyonu Uygulama", completed: false },
+            { id: 23, time: "00:11:58", title: "3.5_Anahtar Cihaz Temel Konfigürasyonu Uygulama", completed: false },
+            { id: 24, time: "00:06:20", title: "3.6_Yönlendirici Cihaz", completed: false },
+            { id: 25, time: "00:09:16", title: "3.7_Yönlendirici Cihaz Temel Konfigürasyonu Uygulama", completed: false },
+            { id: 26, time: "00:09:54", title: "3.8_Yönlendirici Cihaz Temel Konfigürasyonu Uygulama", completed: false },
+            { id: 27, time: "00:10:49", title: "3.9_Uygulama", completed: false }
+        ]},
+        { title: "4. Ağda Adresleme", items: [
+            { id: 28, time: "00:09:20", title: "4.1_Sayı Sistemleri", completed: false },
+            { id: 29, time: "00:10:11", title: "4.2_Fiziksel Adres", completed: false },
+            { id: 30, time: "00:13:20", title: "4.3_Mantıksal Adres IPv4", completed: false },
+            { id: 31, time: "00:06:47", title: "4.4_NAT", completed: false },
+            { id: 32, time: "00:06:58", title: "4.5_ARP", completed: false },
+            { id: 33, time: "00:10:24", title: "4.6_Alt Ağlara Bölme (Subnetting) FLSM", completed: false },
+            { id: 34, time: "00:10:41", title: "4.7_Alt Ağlara Bölme (Subnetting) VLSM", completed: false },
+            { id: 35, time: "00:09:11", title: "4.8_Mantıksal Adres IPv6 1", completed: false },
+            { id: 36, time: "00:10:13", title: "4.9_Mantıksal Adres IPv6 2", completed: false },
+            { id: 37, time: "00:10:22", title: "4.10_DHCPv6 1", completed: false },
+            { id: 38, time: "00:09:43", title: "4.11_DHCPv6 2", completed: false },
+            { id: 39, time: "00:08:57", title: "4.12_Uygulama 1_1", completed: false },
+            { id: 40, time: "00:13:40", title: "4.13_Uygulama 1_2", completed: false },
+            { id: 41, time: "00:08:07", title: "4.14_Uygulama SLAAC", completed: false },
+            { id: 42, time: "00:04:36", title: "4.15_Uygulama SLAAC ve DHCPv6", completed: false },
+            { id: 43, time: "00:05:48", title: "4.16_Uygulama Stateful DHCPv6", completed: false }
+        ]},
+        { title: "5. Anahtarlama (Switching)", items: [
+            { id: 44, time: "00:09:34", title: "5.1_Anahtarlama Kavramı", completed: false },
+            { id: 45, time: "00:10:09", title: "5.2_VLAN 1", completed: false },
+            { id: 46, time: "00:08:59", title: "5.3_VLAN 2", completed: false },
+            { id: 47, time: "00:12:39", title: "5.4_VLAN Uygulama 1", completed: false },
+            { id: 48, time: "00:10:43", title: "5.5_VLAN Uygulama 2_1", completed: false },
+            { id: 49, time: "00:04:28", title: "5.6_VLAN Uygulama 2_2", completed: false },
+            { id: 50, time: "00:10:47", title: "5.7_Inter-VLAN 1", completed: false },
+            { id: 51, time: "00:03:54", title: "5.8_Inter-VLAN 2", completed: false },
+            { id: 52, time: "00:10:30", title: "5.9_Inter-VLAN Uygulama 1_1", completed: false },
+            { id: 53, time: "00:08:59", title: "5.10_Inter-VLAN Uygulama 1_2", completed: false },
+            { id: 54, time: "00:05:57", title: "5.11_Inter-VLAN Uygulama 2", completed: false },
+            { id: 55, time: "00:10:11", title: "5.12_STP 1", completed: false },
+            { id: 56, time: "00:12:43", title: "5.13_STP 2", completed: false },
+            { id: 57, time: "00:09:54", title: "5.14_STP 3", completed: false },
+            { id: 58, time: "00:05:02", title: "5.15_STP 4", completed: false },
+            { id: 59, time: "00:12:09", title: "5.16_STP Uygulama 1", completed: false },
+            { id: 60, time: "00:10:58", title: "5.17_STP Uygulama 2", completed: false },
+            { id: 61, time: "00:08:47", title: "5.18_STP Uygulama 3", completed: false },
+            { id: 62, time: "00:08:44", title: "5.19_STP Uygulama 4", completed: false },
+            { id: 63, time: "00:07:12", title: "5.20_Etherchannel", completed: false },
+            { id: 64, time: "00:04:32", title: "5.21_Etherchannel Uygulama", completed: false }
+        ]},
+        { title: "6. Yönlendirme (Routing)", items: [
+            { id: 65, time: "00:10:35", title: "6.1_Yönlendirme Kavramı 1", completed: false },
+            { id: 66, time: "00:07:33", title: "6.2_Yönlendirme Kavramı 2", completed: false },
+            { id: 67, time: "00:16:30", title: "6.3_Statik Yönlendirme", completed: false },
+            { id: 68, time: "00:11:26", title: "6.4_Statik Yönlendirme Uygulama 1", completed: false },
+            { id: 69, time: "00:08:10", title: "6.5_Statik Yönlendirme Uygulama 2", completed: false },
+            { id: 70, time: "00:10:38", title: "6.6_OSPF 1", completed: false },
+            { id: 71, time: "00:10:38", title: "6.7_OSPF 2", completed: false },
+            { id: 72, time: "00:10:12", title: "6.8_OSPF 3", completed: false },
+            { id: 73, time: "00:13:19", title: "6.9_OSPF 4", completed: false },
+            { id: 74, time: "00:05:49", title: "6.10_OSPF 5", completed: false },
+            { id: 75, time: "00:09:30", title: "6.11_OSPF Uygulama 1_1", completed: false },
+            { id: 76, time: "00:10:39", title: "6.12_OSPF Uygulama 1_2", completed: false },
+            { id: 77, time: "00:11:28", title: "6.13_OSPF Uygulama 1_3", completed: false }
+        ]},
+        { title: "7. Ağda Güvenlik", items: [
+            { id: 78, time: "00:13:52", title: "7.1_Güvenlik Temel Kavramları 1", completed: false },
+            { id: 79, time: "00:12:31", title: "7.2_Güvenlik Temel Kavramları 2", completed: false },
+            { id: 80, time: "00:11:07", title: "7.3_Siber Tehditler 1", completed: false },
+            { id: 81, time: "00:10:26", title: "7.4_Siber Tehditler 2", completed: false },
+            { id: 82, time: "00:04:09", title: "7.5_Siber Tehditler 3", completed: false },
+            { id: 83, time: "00:16:07", title: "7.6_Savunma Yöntemleri", completed: false },
+            { id: 84, time: "00:11:42", title: "7.7_Anahtar Cihaz Güvenlik Yapılandırması 1", completed: false },
+            { id: 85, time: "00:11:19", title: "7.8_Anahtar Cihaz Güvenlik Yapılandırması 2", completed: false },
+            { id: 86, time: "00:11:21", title: "7.9_Anahtar Cihaz Güvenlik Yapılandırması 3", completed: false },
+            { id: 87, time: "00:16:42", title: "7.10_Uygulama 1", completed: false },
+            { id: 88, time: "00:10:17", title: "7.11_Uygulama 2", completed: false },
+            { id: 89, time: "00:02:54", title: "7.12_Uygulama 3", completed: false },
+            { id: 90, time: "00:10:53", title: "7.13_ACL 1", completed: false },
+            { id: 91, time: "00:09:26", title: "7.14_ACL 2", completed: false },
+            { id: 92, time: "00:09:10", title: "7.15_Uygulama 1", completed: false },
+            { id: 93, time: "00:07:22", title: "7.16_Uygulama 2", completed: false },
+            { id: 94, time: "00:09:18", title: "7.17_Uygulama 3_1", completed: false },
+            { id: 95, time: "00:05:34", title: "7.18_Uygulama 3_2", completed: false },
+            { id: 96, time: "00:05:27", title: "7.19_VPN Sanal Özel Ağlar", completed: false },
+            { id: 97, time: "00:09:30", title: "7.20_IPsec", completed: false },
+            { id: 98, time: "00:06:39", title: "7.21_NPS", completed: false }
+        ]},
+        { title: "8. Ağ Optimizasyonu", items: [
+            { id: 99, time: "00:11:00", title: "8.1_Ağ Yönetimi 1", completed: false },
+            { id: 100, time: "00:10:22", title: "8.2_Ağ Yönetimi 2", completed: false },
+            { id: 101, time: "00:11:16", title: "8.3_Ağ Yönetimi Uygulama 1_1", completed: false },
+            { id: 102, time: "00:09:37", title: "8.4_Ağ Yönetimi Uygulama 1_2", completed: false },
+            { id: 103, time: "00:10:27", title: "8.5_Ağ Yönetimi Uygulama 2_1", completed: false },
+            { id: 104, time: "00:06:40", title: "8.6_Ağ Yönetimi Uygulama 2_2", completed: false },
+            { id: 105, time: "00:09:34", title: "8.7_NTP", completed: false },
+            { id: 106, time: "00:10:36", title: "8.8_QoS 1", completed: false },
+            { id: 107, time: "00:07:46", title: "8.9_QoS 2", completed: false },
+            { id: 108, time: "00:10:14", title: "8.10_QoS 3", completed: false },
+            { id: 109, time: "00:05:11", title: "8.11_Syslog", completed: false },
+            { id: 110, time: "00:05:38", title: "8.12_Ağ Test Araçları", completed: false }
+        ]},
+        { title: "9. Sunucu İşletim Sistemi", items: [
+            { id: 111, time: "00:10:28", title: "9.1_Windows Server 2019 Kurulumu 1", completed: false },
+            { id: 112, time: "00:11:25", title: "9.2_Windows Server 2019 Kurulumu 2", completed: false },
+            { id: 113, time: "00:12:14", title: "9.3_Sunucu İşletim Sistemi Yapılandırma Ayarları 1", completed: false },
+            { id: 114, time: "00:03:09", title: "9.4_Sunucu İşletim Sistemi Yapılandırma Ayarları 2", completed: false },
+            { id: 115, time: "00:09:21", title: "9.5_Sunucu İşletim Sistemi Disk Yapılandırması 1", completed: false },
+            { id: 116, time: "00:09:56", title: "9.6_Sunucu İşletim Sistemi Disk Yapılandırması 2", completed: false },
+            { id: 117, time: "00:09:25", title: "9.7_Sunucu İşletim Sistemi Disk Yapılandırması 3", completed: false },
+            { id: 118, time: "00:05:11", title: "9.8_Sunucu İşletim Sistemi Disk Yapılandırması 4", completed: false },
+            { id: 119, time: "00:10:31", title: "9.9_Sunucu İşletim Sistemi Yedekleme İşlemleri", completed: false },
+            { id: 120, time: "00:11:00", title: "9.10_Yeni Nesil Sunucu Teknolojileri 1", completed: false },
+            { id: 121, time: "00:12:16", title: "9.11_Yeni Nesil Sunucu Teknolojileri 2", completed: false },
+            { id: 122, time: "00:14:41", title: "9.12_Yeni Nesil Sunucu Teknolojileri 3", completed: false }
+        ]},
+        { title: "10. Sanallaştırma", items: [
+            { id: 123, time: "00:10:36", title: "10.1_Sanallaştırma Kavramı 1", completed: false },
+            { id: 124, time: "00:12:15", title: "10.2_Sanallaştırma Kavramı 2", completed: false },
+            { id: 125, time: "00:02:31", title: "10.3_Sanallaştırma Kavramı 3", completed: false },
+            { id: 126, time: "00:10:34", title: "10.4_Hyper-V Kurulum ve Sanal Makine Oluşturma 1", completed: false },
+            { id: 127, time: "00:05:12", title: "10.5_Hyper-V Kurulum ve Sanal Makine Oluşturma 2", completed: false },
+            { id: 128, time: "00:09:13", title: "10.6_Sanallaştırma Rolüyle Sanal Makine Eylemleri", completed: false },
+            { id: 129, time: "00:08:53", title: "10.7_Sanallaştırma Rolüyle Sunucu İşletim Sistemi Kurulumu", completed: false }
+        ]},
+        { title: "11. Sunucu Ağ Mimarisi", items: [
+            { id: 130, time: "00:13:19", title: "11.1_Ağ ve Paylaşım Merkezinin Kullanılması 1", completed: false },
+            { id: 131, time: "00:06:34", title: "11.2_Ağ ve Paylaşım Merkezinin Kullanılması 2", completed: false },
+            { id: 132, time: "00:10:56", title: "11.3_DHCP Sunucusu 1", completed: false },
+            { id: 133, time: "00:06:19", title: "11.4_DHCP Sunucusu 2", completed: false },
+            { id: 134, time: "00:09:19", title: "11.5_DNS Sunucusu 1", completed: false },
+            { id: 135, time: "00:12:44", title: "11.6_DNS Sunucusu 2", completed: false },
+            { id: 136, time: "00:08:56", title: "11.7_DNS Sunucusu 3", completed: false }
+        ]},
+        { title: "12. Sunucu Dizin Hizmeti (Active Directory) Yapısı", items: [
+            { id: 137, time: "00:11:29", title: "12.1_Active Directory Hizmetleri Kurulumu 1", completed: false },
+            { id: 138, time: "00:02:34", title: "12.2_Active Directory Hizmetleri Kurulumu 2", completed: false },
+            { id: 139, time: "00:13:46", title: "12.3_Active Directory Yönetimi", completed: false },
+            { id: 140, time: "00:12:15", title: "12.4_Grup Politikalarının Düzenlenmesi", completed: false }
+        ]},
+        { title: "13. Sunucu Rolleri", items: [
+            { id: 141, time: "00:11:26", title: "13.1_Dosya Hizmetleri Yönetimi 1", completed: false },
+            { id: 142, time: "00:05:58", title: "13.2_Dosya Hizmetleri Yönetimi 2", completed: false }
+        ]},
+        { title: "14. Sunucu Hizmetleri", items: [
+            { id: 143, time: "00:10:02", title: "14.1_Dosya Hizmetleri Yönetimi 1", completed: false },
+            { id: 144, time: "00:08:23", title: "14.2_Dosya Hizmetleri Yönetimi 2", completed: false },
+            { id: 145, time: "00:08:56", title: "14.3_Uzak Masaüstü Hizmetleri Yönetimi", completed: false },
+            { id: 146, time: "00:11:47", title: "14.4_Dağıtım Hizmetleri Yönetimi (WDS)", completed: false }
+        ]},
+        { title: "15. Sunucu Performansını İzleme", items: [
+            { id: 147, time: "00:13:39", title: "15.1_Sunucu Performansı", completed: false },
+            { id: 148, time: "00:03:23", title: "15.2_Sunucu Güncellenmesi", completed: false }
+        ]},
+        { title: "16. Geniş Alan Ağ Teknolojileri (WAN)", items: [
+            { id: 149, time: "00:12:30", title: "16.1_WAN Kavramı ve Bağlantı Türleri 1", completed: false },
+            { id: 150, time: "00:08:25", title: "16.2_WAN Kavramı ve Bağlantı Türleri 2", completed: false },
+            { id: 151, time: "00:10:12", title: "16.3_WAN Kavramı ve Bağlantı Türleri 3", completed: false },
+            { id: 152, time: "00:07:16", title: "16.4_WAN Kavramı ve Bağlantı Türleri 4", completed: false },
+            { id: 153, time: "00:13:17", title: "16.5_MPLS Temelleri 1", completed: false },
+            { id: 154, time: "00:08:54", title: "16.6_MPLS Temelleri 2", completed: false },
+            { id: 155, time: "00:07:18", title: "16.7_MPLS Temelleri 3", completed: false },
+            { id: 156, time: "00:12:58", title: "16.8_SD-WAN Teknolojisi", completed: false }
+        ]},
+        { title: "17. Eğitim Sonu - Kapanış", items: [
+            { id: 157, time: "00:15:00", title: "17.1_Eğitim Sonu", completed: false }
+        ]}
+    ];
+
+    let savedRoutine = JSON.parse(localStorage.getItem('routine_progress_v5')) || {};
+    let savedCourses = JSON.parse(localStorage.getItem('course_progress_v5')) || {};
+
+    routineBlocks.forEach(mod => {
+        mod.items.forEach(item => {
+            if (savedRoutine[item.id] !== undefined) item.completed = savedRoutine[item.id];
+        });
+    });
+
+    courseModules.forEach(mod => {
+        mod.items.forEach(item => {
+            if (savedCourses[item.id] !== undefined) item.completed = savedCourses[item.id];
+        });
+    });
+
+    // Projeksiyon Modu
+    const projBtn = document.getElementById('projection-toggle-btn');
+    let isProjectionMode = localStorage.getItem('projectionMode') === 'true';
+    if (isProjectionMode) {
+        document.getElementById('body').classList.add('projection-mode');
+        projBtn.style.background = 'var(--accent-green)';
+        projBtn.style.color = '#000';
+    }
+
+    projBtn.addEventListener('click', () => {
+        isProjectionMode = !isProjectionMode;
+        document.getElementById('body').classList.toggle('projection-mode', isProjectionMode);
+        localStorage.setItem('projectionMode', isProjectionMode);
+        projBtn.style.background = isProjectionMode ? 'var(--accent-green)' : '';
+        projBtn.style.color = isProjectionMode ? '#000' : '';
+    });
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('tr-TR');
+        document.getElementById('date-display').innerText = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        
+        checkAutoRoutineTrigger(now);
+    }
+
+    // Pomodoro Otomasyonu & Anlık Senkronize Sayaç
+    let pomoTimer = null;
+    let pomoSeconds = 25 * 60;
+    let pomoState = 'idle';
+    let activeRoutineItemId = null;
+    let hasSyncedOnLoad = false;
+
+    function updatePomoDisplay() {
+        const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
+        const s = String(pomoSeconds % 60).padStart(2, '0');
+        document.getElementById('pomo-display').innerText = `${m}:${s}`;
+    }
+
+    function startPomodoroSession(durationMinutes, routineId, label, remainingSeconds = null) {
+        if (pomoTimer) clearInterval(pomoTimer);
+        
+        pomoSeconds = remainingSeconds !== null ? remainingSeconds : (durationMinutes * 60);
+        activeRoutineItemId = routineId;
+        pomoState = label.includes('Mola') ? 'break' : 'work';
+
+        const labelEl = document.getElementById('pomo-mode-label');
+        if (labelEl) {
+            labelEl.innerText = label;
+            labelEl.style.color = pomoState === 'work' ? 'var(--accent-purple)' : 'var(--accent-green)';
+        }
+        
+        const startBtn = document.getElementById('pomo-start-btn');
+        if (startBtn) startBtn.innerHTML = '<i data-lucide="pause"></i> Duraklat';
+        lucide.createIcons();
+
+        renderRoutine();
+
+        pomoTimer = setInterval(() => {
+            pomoSeconds--;
+            updatePomoDisplay();
+
+            if (pomoSeconds <= 0) {
+                clearInterval(pomoTimer);
+                pomoTimer = null;
+
+                // Süre bitince otomatik tik at
+                if (activeRoutineItemId) {
+                    toggleRoutine(activeRoutineItemId, true);
+                }
+
+                playAudio('notif');
+                triggerPersistentAlarm();
+
+                if (labelEl) labelEl.innerText = "Süre Tamamlandı!";
+                if (startBtn) startBtn.innerHTML = '<i data-lucide="play"></i> Başlat';
+                activeRoutineItemId = null;
+                lucide.createIcons();
+            }
+        }, 1000);
+    }
+
+    // Saate göre anlık eşleşme ve otomatik tamamlama
+    function checkAutoRoutineTrigger(now) {
+        const currentHour = now.getHours();
+        const currentMin = now.getMinutes();
+        const totalMins = currentHour * 60 + currentMin;
+
+        routineBlocks.forEach(mod => {
+            mod.items.forEach(item => {
+                const [startStr, endStr] = item.time.split(' - ');
+                const [sh, sm] = startStr.split(':').map(Number);
+                const [eh, em] = endStr.split(':').map(Number);
+                const startTotal = sh * 60 + sm;
+                const endTotal = eh * 60 + em;
+
+                // Geçmiş saatlerdeki bitmiş adımları otomatik işaretle (tik at)
+                if (totalMins > endTotal && !item.completed) {
+                    toggleRoutine(item.id, true);
+                }
+
+                // Şu an içindeki aktif adımı bul ve sayacı senkronize et
+                if (totalMins >= startTotal && totalMins < endTotal) {
+                    // Geçmişteki adımları bitmiş say
+                    if (!item.completed && pomoState === 'idle' && !hasSyncedOnLoad) {
+                        activeRoutineItemId = item.id;
+                        const elapsedMins = totalMins - startTotal;
+                        const totalDuration = endTotal - startTotal;
+                        const remainingSecs = (totalDuration - elapsedMins) * 60 - now.getSeconds();
+
+                        if (remainingSecs > 0) {
+                            startPomodoroSession(totalDuration, item.id, item.title, remainingSecs);
+                        }
+                    }
+                }
+            });
+        });
+        hasSyncedOnLoad = true;
+    }
+
+    // Otomatik Kaydırma (Günlük Rutin Aktif Satıra)
+    function scrollToActiveRoutine() {
+        setTimeout(() => {
+            const activeRow = document.querySelector('.routine-item.active-pomo-row');
+            if (activeRow) {
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+
+    // Otomatik Kaydırma (Eğitim Planı Son Kalınan Yere)
+    function scrollToLastCourse() {
+        setTimeout(() => {
+            const container = document.getElementById('course-container');
+            const firstUncompleted = container.querySelector('.routine-item:not(.completed)');
+            if (firstUncompleted) {
+                firstUncompleted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+
+    document.getElementById('pomo-start-btn').addEventListener('click', () => {
+        if (pomoTimer) {
+            clearInterval(pomoTimer);
+            pomoTimer = null;
+            document.getElementById('pomo-start-btn').innerHTML = '<i data-lucide="play"></i> Devam Et';
+            lucide.createIcons();
+            return;
+        }
+
+        if (pomoState === 'idle') {
+            let targetItem = null;
+            for (let mod of routineBlocks) {
+                for (let item of mod.items) {
+                    if (!item.completed) {
+                        targetItem = item;
+                        break;
+                    }
+                }
+                if (targetItem) break;
+            }
+
+            if (targetItem) {
+                const duration = targetItem.duration || 25;
+                startPomodoroSession(duration, targetItem.id, targetItem.title);
+            } else {
+                startPomodoroSession(25, null, "Serbest Çalışma (25 Dk)");
+            }
+        } else {
+            startPomodoroSession(Math.ceil(pomoSeconds / 60), activeRoutineItemId, document.getElementById('pomo-mode-label').innerText, pomoSeconds);
+        }
+    });
+
+    document.getElementById('pomo-reset-btn').addEventListener('click', () => {
+        if (pomoTimer) clearInterval(pomoTimer);
+        pomoTimer = null;
+        pomoState = 'idle';
+        pomoSeconds = 25 * 60;
+        activeRoutineItemId = null;
+        document.getElementById('pomo-mode-label').innerText = "Hazır";
+        document.getElementById('pomo-mode-label').style.color = "var(--accent-purple)";
+        document.getElementById('pomo-start-btn').innerHTML = '<i data-lucide="play"></i> Başlat';
+        updatePomoDisplay();
+        renderRoutine();
+        lucide.createIcons();
+    });
+
+    function renderRoutine() {
+        const container = document.getElementById('routine-container');
+        container.innerHTML = '';
+
+        routineBlocks.forEach(mod => {
+            const header = document.createElement('div');
+            header.className = 'section-title';
+            header.innerHTML = `<i data-lucide="list-checks" style="width:16px;"></i> ${mod.title}`;
+            container.appendChild(header);
+
+            mod.items.forEach(item => {
+                const isActivePomo = (activeRoutineItemId === item.id);
+                const div = document.createElement('div');
+                div.className = `routine-item ${item.completed ? 'completed' : ''} ${isActivePomo ? 'active-pomo-row' : ''}`;
+                div.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-time">${item.time}</span>
+                        <span class="item-title">${item.title} ${isActivePomo ? '🟢 (Çalışılıyor)' : ''}</span>
+                    </div>
+                    <div class="action-box">
+                        <button class="check-btn" onclick="toggleRoutine('${item.id}')">
+                            ${item.completed ? '<i data-lucide="check"></i>' : ''}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        });
+        lucide.createIcons();
+        updateStats();
+    }
+
+    function toggleRoutine(id, forcedState = null) {
+        routineBlocks.forEach(mod => {
+            mod.items.forEach(item => {
+                if (item.id === id) {
+                    item.completed = forcedState !== null ? forcedState : !item.completed;
+                    savedRoutine[id] = item.completed;
+                }
+            });
+        });
+        localStorage.setItem('routine_progress_v5', JSON.stringify(savedRoutine));
+        renderRoutine();
+    }
+
+    function renderCourses() {
+        const container = document.getElementById('course-container');
+        container.innerHTML = '';
+
+        courseModules.forEach(mod => {
+            const header = document.createElement('div');
+            header.className = 'section-title';
+            header.innerHTML = `<i data-lucide="folder" style="width:16px;"></i> ${mod.title}`;
+            container.appendChild(header);
+
+            mod.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `routine-item ${item.completed ? 'completed' : ''}`;
+                div.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-time">${item.time}</span>
+                        <span class="item-title">${item.title}</span>
+                    </div>
+                    <div class="action-box">
+                        <button class="check-btn" onclick="toggleCourse(${item.id})">
+                            ${item.completed ? '<i data-lucide="check"></i>' : ''}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        });
+
+        lucide.createIcons();
+        updateStats();
+    }
+
+    function toggleCourse(id) {
+        courseModules.forEach(mod => {
+            mod.items.forEach(item => {
+                if (item.id === id) {
+                    item.completed = !item.completed;
+                    savedCourses[id] = item.completed;
+                }
+            });
+        });
+
+        localStorage.setItem('course_progress_v5', JSON.stringify(savedCourses));
+        renderCourses();
+    }
+
+    function updateStats() {
+        let routineTotal = 0;
+        let routineCompleted = 0;
+        routineBlocks.forEach(mod => {
+            mod.items.forEach(item => {
+                routineTotal++;
+                if (item.completed) routineCompleted++;
+            });
+        });
+        const routineRate = routineTotal > 0 ? Math.round((routineCompleted / routineTotal) * 100) : 0;
+
+        let courseTotal = 0;
+        let courseCompleted = 0;
+        courseModules.forEach(mod => {
+            mod.items.forEach(item => {
+                courseTotal++;
+                if (item.completed) courseCompleted++;
+            });
+        });
+        const courseRate = courseTotal > 0 ? Math.round((courseCompleted / courseTotal) * 100) : 0;
+
+        const overallRate = Math.round((routineRate + courseRate) / 2);
+
+        document.getElementById('stat-routine-rate').innerText = `${routineRate}%`;
+        document.getElementById('stat-completed-count').innerText = `${courseCompleted} / ${courseTotal}`;
+        document.getElementById('stat-rate').innerText = `${overallRate}%`;
+        document.getElementById('progress-text').innerText = `${courseRate}%`;
+        document.getElementById('progress-fill').style.width = `${courseRate}%`;
+    }
+
+    document.getElementById('reset-routine-btn').addEventListener('click', () => {
+        if (confirm("Günlük rutini sıfırlamak istediğinize emin misiniz?")) {
+            routineBlocks.forEach(mod => { mod.items.forEach(item => { item.completed = false; }); });
+            savedRoutine = {};
+            localStorage.removeItem('routine_progress_v5');
+            renderRoutine();
+        }
+    });
+
+    document.getElementById('reset-courses-btn').addEventListener('click', () => {
+        if (confirm("Eğitim ilerlemelerini sıfırlamak istediğinize emin misiniz?")) {
+            courseModules.forEach(mod => { mod.items.forEach(item => { item.completed = false; }); });
+            savedCourses = {};
+            localStorage.removeItem('course_progress_v5');
+            renderCourses();
+        }
+    });
+
+    document.getElementById('clear-all-btn').addEventListener('click', () => {
+        if (confirm("Tüm verileriniz tamamen silinecek. Emin misiniz?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    });
+
+    setInterval(updateClock, 1000);
+    updateClock();
+    renderRoutine();
+    renderCourses();
+    updatePomoDisplay();
+    scrollToActiveRoutine();
+</script>
+
 </body>
 </html>
