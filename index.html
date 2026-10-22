@@ -77,9 +77,12 @@
         }
 
         .card {
+            background: #161b22;
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            /* Eski Android WebView için opak zemin */
+            backdrop-filter: none;
+            -webkit-/* Eski Android WebView için opak zemin */
+            backdrop-filter: none;
             border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 20px;
@@ -167,7 +170,7 @@
             max-height: 550px;
             overflow-y: auto;
             padding-right: 5px;
-            scroll-behavior: smooth;
+            scroll-behavior: auto;
         }
 
         .routine-item {
@@ -527,6 +530,19 @@
 </div>
 
 <script>
+    // Harici ikon servisi çalışmasa bile sayfanın işlevleri devam eder.
+    function safeIcons() {
+        try {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+        } catch (e) { console.warn('İkonlar yüklenemedi:', e); }
+    }
+    function readStore(key, fallback) {
+        try { var value = localStorage.getItem(key); return value ? JSON.parse(value) : fallback; }
+        catch (e) { return fallback; }
+    }
+    function writeStore(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+    }
     let activeAlarmAudio = null;
     let isAlarmPlaying = false;
 
@@ -593,14 +609,14 @@
         
         if (tabName === 'routine') {
             document.getElementById('tab-routine').classList.add('active');
-            event.currentTarget.classList.add('active');
+            document.querySelector(".tab-btn[onclick*=\"" + tabName + "\"]").classList.add('active');
             scrollToActiveRoutine();
         } else {
             document.getElementById('tab-courses').classList.add('active');
-            event.currentTarget.classList.add('active');
+            document.querySelector(".tab-btn[onclick*=\"" + tabName + "\"]").classList.add('active');
             scrollToLastCourse();
         }
-        lucide.createIcons();
+        safeIcons();
     }
 
     // RUTİN BLOKLARI
@@ -858,8 +874,8 @@
         ]}
     ];
 
-    let savedRoutine = JSON.parse(localStorage.getItem('routine_progress_v5')) || {};
-    let savedCourses = JSON.parse(localStorage.getItem('course_progress_v5')) || {};
+    let savedRoutine = readStore('routine_progress_v5', {});
+    let savedCourses = readStore('course_progress_v5', {});
 
     routineBlocks.forEach(mod => {
         mod.items.forEach(item => {
@@ -898,98 +914,106 @@
         checkAutoRoutineTrigger(now);
     }
 
-    // Pomodoro Otomasyonu & Anlık Senkronize Sayaç
-    let pomoTimer = null;
-    let pomoSeconds = 25 * 60;
-    let pomoState = 'idle';
-    let activeRoutineItemId = null;
-    let hasSyncedOnLoad = false;
+    // Gerçek saate dayalı, yenilemeden ve cihaz uyku modundan etkilenmeyen sayaç.
+    var pomoTimer = null;
+    var pomoSeconds = 25 * 60;
+    var pomoState = 'idle';
+    var activeRoutineItemId = null;
+    var pomoDeadline = null;
+    var pomoLabel = 'Hazır';
+    var pomoDuration = 1500;
+    var pomoPaused = false;
+    var completedSessionId = null;
+    var POMO_KEY = 'pomodoro_session_v6';
 
     function updatePomoDisplay() {
-        const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
-        const s = String(pomoSeconds % 60).padStart(2, '0');
-        document.getElementById('pomo-display').innerText = `${m}:${s}`;
+        var m = String(Math.floor(Math.max(0, pomoSeconds) / 60)).padStart(2, '0');
+        var sec = String(Math.max(0, pomoSeconds) % 60).padStart(2, '0');
+        document.getElementById('pomo-display').innerText = m + ':' + sec;
     }
-
-    function startPomodoroSession(durationMinutes, routineId, label, remainingSeconds = null) {
+    function updatePomoUI() {
+        var labelEl = document.getElementById('pomo-mode-label');
+        labelEl.innerText = pomoLabel;
+        labelEl.style.color = pomoState === 'break' ? 'var(--accent-green)' : 'var(--accent-purple)';
+        document.getElementById('pomo-start-btn').innerHTML = pomoDeadline ? '<i data-lucide="pause"></i> Duraklat' :
+            (pomoPaused ? '<i data-lucide="play"></i> Devam Et' : '<i data-lucide="play"></i> Başlat');
+        updatePomoDisplay();
+        safeIcons();
+    }
+    function savePomo() {
+        writeStore(POMO_KEY, { deadline: pomoDeadline, seconds: pomoSeconds, state: pomoState,
+            itemId: activeRoutineItemId, label: pomoLabel, duration: pomoDuration, paused: pomoPaused,
+            completedId: completedSessionId });
+    }
+    function finishPomodoro() {
         if (pomoTimer) clearInterval(pomoTimer);
-        
-        pomoSeconds = remainingSeconds !== null ? remainingSeconds : (durationMinutes * 60);
-        activeRoutineItemId = routineId;
-        pomoState = label.includes('Mola') ? 'break' : 'work';
-
-        const labelEl = document.getElementById('pomo-mode-label');
-        if (labelEl) {
-            labelEl.innerText = label;
-            labelEl.style.color = pomoState === 'work' ? 'var(--accent-purple)' : 'var(--accent-green)';
-        }
-        
-        const startBtn = document.getElementById('pomo-start-btn');
-        if (startBtn) startBtn.innerHTML = '<i data-lucide="pause"></i> Duraklat';
-        lucide.createIcons();
-
+        pomoTimer = null;
+        pomoDeadline = null;
+        pomoSeconds = 0;
+        pomoPaused = false;
+        pomoState = 'finished';
+        pomoLabel = 'Süre Tamamlandı!';
+        var finishedItem = activeRoutineItemId;
+        activeRoutineItemId = null;
+        if (finishedItem) toggleRoutine(finishedItem, true);
+        savePomo();
+        updatePomoUI();
         renderRoutine();
-
-        pomoTimer = setInterval(() => {
-            pomoSeconds--;
-            updatePomoDisplay();
-
-            if (pomoSeconds <= 0) {
-                clearInterval(pomoTimer);
-                pomoTimer = null;
-
-                // Süre bitince otomatik tik at
-                if (activeRoutineItemId) {
-                    toggleRoutine(activeRoutineItemId, true);
-                }
-
-                playAudio('notif');
-                triggerPersistentAlarm();
-
-                if (labelEl) labelEl.innerText = "Süre Tamamlandı!";
-                if (startBtn) startBtn.innerHTML = '<i data-lucide="play"></i> Başlat';
-                activeRoutineItemId = null;
-                lucide.createIcons();
-            }
-        }, 1000);
+        triggerPersistentAlarm();
     }
-
-    // Saate göre anlık eşleşme ve otomatik tamamlama
+    function tickPomodoro() {
+        if (!pomoDeadline) return;
+        pomoSeconds = Math.max(0, Math.ceil((pomoDeadline - Date.now()) / 1000));
+        if (pomoSeconds <= 0) { finishPomodoro(); return; }
+        updatePomoDisplay();
+    }
+    function runPomoInterval() {
+        if (pomoTimer) clearInterval(pomoTimer);
+        pomoTimer = setInterval(tickPomodoro, 250);
+        tickPomodoro();
+    }
+    function startPomodoroSession(durationMinutes, routineId, label, remainingSeconds) {
+        if (pomoTimer) clearInterval(pomoTimer);
+        pomoDuration = Math.max(1, Math.round(durationMinutes * 60));
+        pomoSeconds = remainingSeconds == null ? pomoDuration : Math.max(0, Math.ceil(remainingSeconds));
+        activeRoutineItemId = routineId;
+        pomoState = label.indexOf('Mola') >= 0 || label.indexOf('Dinlenme') >= 0 ? 'break' : 'work';
+        pomoLabel = label;
+        pomoPaused = false;
+        completedSessionId = null;
+        pomoDeadline = Date.now() + pomoSeconds * 1000;
+        savePomo();
+        updatePomoUI();
+        renderRoutine();
+        runPomoInterval();
+    }
+    function restorePomodoro() {
+        var saved = readStore(POMO_KEY, null);
+        if (!saved || !saved.state) { updatePomoUI(); return; }
+        pomoState = saved.state;
+        pomoSeconds = Math.max(0, Number(saved.seconds) || 0);
+        pomoDeadline = saved.deadline ? Number(saved.deadline) : null;
+        activeRoutineItemId = saved.itemId || null;
+        pomoLabel = saved.label || 'Hazır';
+        pomoDuration = saved.duration || 1500;
+        pomoPaused = !!saved.paused;
+        completedSessionId = saved.completedId || null;
+        if (pomoDeadline) runPomoInterval();
+        updatePomoUI();
+    }
+    // Takvim akışını göster; kullanıcı başlatmadıkça veya duraklattıysa otomatik sayaç açma.
     function checkAutoRoutineTrigger(now) {
-        const currentHour = now.getHours();
-        const currentMin = now.getMinutes();
-        const totalMins = currentHour * 60 + currentMin;
-
-        routineBlocks.forEach(mod => {
-            mod.items.forEach(item => {
-                const [startStr, endStr] = item.time.split(' - ');
-                const [sh, sm] = startStr.split(':').map(Number);
-                const [eh, em] = endStr.split(':').map(Number);
-                const startTotal = sh * 60 + sm;
-                const endTotal = eh * 60 + em;
-
-                // Geçmiş saatlerdeki bitmiş adımları otomatik işaretle (tik at)
-                if (totalMins > endTotal && !item.completed) {
-                    toggleRoutine(item.id, true);
-                }
-
-                // Şu an içindeki aktif adımı bul ve sayacı senkronize et
-                if (totalMins >= startTotal && totalMins < endTotal) {
-                    // Geçmişteki adımları bitmiş say
-                    if (!item.completed && pomoState === 'idle' && !hasSyncedOnLoad) {
-                        activeRoutineItemId = item.id;
-                        const elapsedMins = totalMins - startTotal;
-                        const totalDuration = endTotal - startTotal;
-                        const remainingSecs = (totalDuration - elapsedMins) * 60 - now.getSeconds();
-
-                        if (remainingSecs > 0) {
-                            startPomodoroSession(totalDuration, item.id, item.title, remainingSecs);
-                        }
-                    }
-                }
-            });
-        });
-        hasSyncedOnLoad = true;
+        var current = now.getHours() * 60 + now.getMinutes();
+        var active = null;
+        routineBlocks.forEach(function(mod) { mod.items.forEach(function(item) {
+            var parts = item.time.split(' - ');
+            var a = parts[0].split(':').map(Number), b = parts[1].split(':').map(Number);
+            var from = a[0] * 60 + a[1], to = b[0] * 60 + b[1];
+            if (to > from && current >= from && current < to) active = item;
+        }); });
+        var info = document.getElementById('pomo-info-text');
+        if (info && !pomoDeadline && pomoState === 'idle')
+            info.innerText = active ? 'Şu anki plan: ' + active.title + ' — Başlat ile sayacı çalıştır.' : 'Başlat ile odaklanma oturumunu başlat.';
     }
 
     // Otomatik Kaydırma (Günlük Rutin Aktif Satıra)
@@ -997,7 +1021,7 @@
         setTimeout(() => {
             const activeRow = document.querySelector('.routine-item.active-pomo-row');
             if (activeRow) {
-                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                try { activeRow.scrollIntoView(false); } catch (e) {}
             }
         }, 100);
     }
@@ -1008,55 +1032,40 @@
             const container = document.getElementById('course-container');
             const firstUncompleted = container.querySelector('.routine-item:not(.completed)');
             if (firstUncompleted) {
-                firstUncompleted.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                try { firstUncompleted.scrollIntoView(false); } catch (e) {}
             }
         }, 100);
     }
 
-    document.getElementById('pomo-start-btn').addEventListener('click', () => {
-        if (pomoTimer) {
-            clearInterval(pomoTimer);
-            pomoTimer = null;
-            document.getElementById('pomo-start-btn').innerHTML = '<i data-lucide="play"></i> Devam Et';
-            lucide.createIcons();
-            return;
+    document.getElementById('pomo-start-btn').addEventListener('click', function() {
+        if (pomoDeadline) {
+            tickPomodoro();
+            if (!pomoDeadline) return;
+            clearInterval(pomoTimer); pomoTimer = null;
+            pomoDeadline = null; pomoPaused = true;
+            savePomo(); updatePomoUI(); return;
         }
-
-        if (pomoState === 'idle') {
-            let targetItem = null;
-            for (let mod of routineBlocks) {
-                for (let item of mod.items) {
-                    if (!item.completed) {
-                        targetItem = item;
-                        break;
-                    }
-                }
-                if (targetItem) break;
-            }
-
-            if (targetItem) {
-                const duration = targetItem.duration || 25;
-                startPomodoroSession(duration, targetItem.id, targetItem.title);
-            } else {
-                startPomodoroSession(25, null, "Serbest Çalışma (25 Dk)");
-            }
-        } else {
-            startPomodoroSession(Math.ceil(pomoSeconds / 60), activeRoutineItemId, document.getElementById('pomo-mode-label').innerText, pomoSeconds);
+        if (pomoPaused && pomoSeconds > 0) {
+            pomoDeadline = Date.now() + pomoSeconds * 1000;
+            pomoPaused = false;
+            savePomo(); updatePomoUI(); runPomoInterval(); return;
         }
+        var target = null;
+        for (var i = 0; i < routineBlocks.length && !target; i++) {
+            for (var j = 0; j < routineBlocks[i].items.length; j++) {
+                var item = routineBlocks[i].items[j];
+                if (!item.completed && (item.type === 'pomo' || item.type === 'break')) { target = item; break; }
+            }
+        }
+        if (target) startPomodoroSession(target.duration || 25, target.id, target.title);
+        else startPomodoroSession(25, null, 'Serbest Çalışma (25 Dk)');
     });
-
-    document.getElementById('pomo-reset-btn').addEventListener('click', () => {
+    document.getElementById('pomo-reset-btn').addEventListener('click', function() {
         if (pomoTimer) clearInterval(pomoTimer);
-        pomoTimer = null;
-        pomoState = 'idle';
-        pomoSeconds = 25 * 60;
-        activeRoutineItemId = null;
-        document.getElementById('pomo-mode-label').innerText = "Hazır";
-        document.getElementById('pomo-mode-label').style.color = "var(--accent-purple)";
-        document.getElementById('pomo-start-btn').innerHTML = '<i data-lucide="play"></i> Başlat';
-        updatePomoDisplay();
-        renderRoutine();
-        lucide.createIcons();
+        pomoTimer = null; pomoDeadline = null; pomoState = 'idle';
+        pomoSeconds = 1500; activeRoutineItemId = null;
+        pomoLabel = 'Hazır'; pomoPaused = false;
+        savePomo(); updatePomoUI(); renderRoutine();
     });
 
     function renderRoutine() {
@@ -1087,7 +1096,7 @@
                 container.appendChild(div);
             });
         });
-        lucide.createIcons();
+        safeIcons();
         updateStats();
     }
 
@@ -1100,7 +1109,7 @@
                 }
             });
         });
-        localStorage.setItem('routine_progress_v5', JSON.stringify(savedRoutine));
+        writeStore('routine_progress_v5', savedRoutine);
         renderRoutine();
     }
 
@@ -1132,7 +1141,7 @@
             });
         });
 
-        lucide.createIcons();
+        safeIcons();
         updateStats();
     }
 
@@ -1146,7 +1155,7 @@
             });
         });
 
-        localStorage.setItem('course_progress_v5', JSON.stringify(savedCourses));
+        writeStore('course_progress_v5', savedCourses);
         renderCourses();
     }
 
@@ -1206,11 +1215,13 @@
     });
 
     setInterval(updateClock, 1000);
-    updateClock();
     renderRoutine();
     renderCourses();
-    updatePomoDisplay();
+    restorePomodoro();
+    updateClock();
     scrollToActiveRoutine();
+    document.addEventListener('visibilitychange', function() { if (!document.hidden) { tickPomodoro(); updateClock(); } });
+    window.addEventListener('pageshow', function() { tickPomodoro(); updateClock(); });
 </script>
 
 </body>
