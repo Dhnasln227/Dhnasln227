@@ -474,10 +474,10 @@
                 <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600;">Hazır</span>
             </div>
             <div class="pomo-timer" id="pomo-display">25:00</div>
-            <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Saate göre anlık senkronize çalışır.</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Günlük plana göre otomatik senkronize çalışır.</p>
             <div class="pomo-controls">
-                <button class="btn btn-primary" id="pomo-start-btn"><i data-lucide="play"></i> Başlat</button>
-                <button class="btn" id="pomo-reset-btn"><i data-lucide="rotate-ccw"></i> Sıfırla</button>
+                <button class="btn btn-primary" id="pomo-start-btn">Otomatik alarm: Kapalı</button>
+                <button class="btn" id="pomo-reset-btn"><i data-lucide="volume-x"></i> Alarmı Kapat</button>
             </div>
         </div>
 
@@ -914,108 +914,100 @@
         checkAutoRoutineTrigger(now);
     }
 
-    // Gerçek saate dayalı, yenilemeden ve cihaz uyku modundan etkilenmeyen sayaç.
+    // Saat bazlı plan motoru: açılış zamanından bağımsız, her zaman takvimle senkron.
     var pomoTimer = null;
-    var pomoSeconds = 25 * 60;
+    var pomoSeconds = 0;
     var pomoState = 'idle';
     var activeRoutineItemId = null;
-    var pomoDeadline = null;
-    var pomoLabel = 'Hazır';
-    var pomoDuration = 1500;
-    var pomoPaused = false;
-    var completedSessionId = null;
-    var POMO_KEY = 'pomodoro_session_v6';
-
-    function updatePomoDisplay() {
-        var m = String(Math.floor(Math.max(0, pomoSeconds) / 60)).padStart(2, '0');
-        var sec = String(Math.max(0, pomoSeconds) % 60).padStart(2, '0');
-        document.getElementById('pomo-display').innerText = m + ':' + sec;
+    var lastScheduleKey = '';
+    var mutedScheduleKey = '';
+    var scheduleAlarmEnabled = false;
+    function pad2(n) { return ('0' + n).slice(-2); }
+    function formatCountdown(seconds) {
+        seconds = Math.max(0, Math.ceil(seconds));
+        var h = Math.floor(seconds / 3600);
+        var m = Math.floor((seconds % 3600) / 60);
+        var sec = seconds % 60;
+        return (h ? pad2(h) + ':' : '') + pad2(m) + ':' + pad2(sec);
     }
-    function updatePomoUI() {
-        var labelEl = document.getElementById('pomo-mode-label');
-        labelEl.innerText = pomoLabel;
-        labelEl.style.color = pomoState === 'break' ? 'var(--accent-green)' : 'var(--accent-purple)';
-        document.getElementById('pomo-start-btn').innerHTML = pomoDeadline ? '<i data-lucide="pause"></i> Duraklat' :
-            (pomoPaused ? '<i data-lucide="play"></i> Devam Et' : '<i data-lucide="play"></i> Başlat');
-        updatePomoDisplay();
-        safeIcons();
+    function getSchedule(now) {
+        var minute = now.getHours() * 60 + now.getMinutes();
+        var all = [];
+        routineBlocks.forEach(function(group) {
+            group.items.forEach(function(item) {
+                var t = item.time.split(' - ');
+                if (t.length !== 2) return;
+                var a = t[0].split(':'); var b = t[1].split(':');
+                var start = Number(a[0]) * 60 + Number(a[1]);
+                var end = Number(b[0]) * 60 + Number(b[1]);
+                if (end <= start) end += 1440;
+                all.push({item:item, start:start, end:end});
+            });
+        });
+        var current = null, next = null, nextDelta = Infinity;
+        all.forEach(function(slot) {
+            var offset = minute;
+            if (slot.end > 1440 && minute < slot.end - 1440) offset += 1440;
+            if (offset >= slot.start && offset < slot.end) current = slot;
+            var delta = (slot.start - minute + 1440) % 1440;
+            if (delta === 0) delta = 1440;
+            if (delta < nextDelta) { nextDelta = delta; next = slot; }
+        });
+        return {current:current, next:next, nextDelta:nextDelta};
     }
-    function savePomo() {
-        writeStore(POMO_KEY, { deadline: pomoDeadline, seconds: pomoSeconds, state: pomoState,
-            itemId: activeRoutineItemId, label: pomoLabel, duration: pomoDuration, paused: pomoPaused,
-            completedId: completedSessionId });
-    }
-    function finishPomodoro() {
-        if (pomoTimer) clearInterval(pomoTimer);
-        pomoTimer = null;
-        pomoDeadline = null;
-        pomoSeconds = 0;
-        pomoPaused = false;
-        pomoState = 'finished';
-        pomoLabel = 'Süre Tamamlandı!';
-        var finishedItem = activeRoutineItemId;
-        activeRoutineItemId = null;
-        if (finishedItem) toggleRoutine(finishedItem, true);
-        savePomo();
-        updatePomoUI();
-        renderRoutine();
-        triggerPersistentAlarm();
-    }
-    function tickPomodoro() {
-        if (!pomoDeadline) return;
-        pomoSeconds = Math.max(0, Math.ceil((pomoDeadline - Date.now()) / 1000));
-        if (pomoSeconds <= 0) { finishPomodoro(); return; }
-        updatePomoDisplay();
-    }
-    function runPomoInterval() {
-        if (pomoTimer) clearInterval(pomoTimer);
-        pomoTimer = setInterval(tickPomodoro, 250);
-        tickPomodoro();
-    }
-    function startPomodoroSession(durationMinutes, routineId, label, remainingSeconds) {
-        if (pomoTimer) clearInterval(pomoTimer);
-        pomoDuration = Math.max(1, Math.round(durationMinutes * 60));
-        pomoSeconds = remainingSeconds == null ? pomoDuration : Math.max(0, Math.ceil(remainingSeconds));
-        activeRoutineItemId = routineId;
-        pomoState = label.indexOf('Mola') >= 0 || label.indexOf('Dinlenme') >= 0 ? 'break' : 'work';
-        pomoLabel = label;
-        pomoPaused = false;
-        completedSessionId = null;
-        pomoDeadline = Date.now() + pomoSeconds * 1000;
-        savePomo();
-        updatePomoUI();
-        renderRoutine();
-        runPomoInterval();
-    }
-    function restorePomodoro() {
-        var saved = readStore(POMO_KEY, null);
-        if (!saved || !saved.state) { updatePomoUI(); return; }
-        pomoState = saved.state;
-        pomoSeconds = Math.max(0, Number(saved.seconds) || 0);
-        pomoDeadline = saved.deadline ? Number(saved.deadline) : null;
-        activeRoutineItemId = saved.itemId || null;
-        pomoLabel = saved.label || 'Hazır';
-        pomoDuration = saved.duration || 1500;
-        pomoPaused = !!saved.paused;
-        completedSessionId = saved.completedId || null;
-        if (pomoDeadline) runPomoInterval();
-        updatePomoUI();
-    }
-    // Takvim akışını göster; kullanıcı başlatmadıkça veya duraklattıysa otomatik sayaç açma.
     function checkAutoRoutineTrigger(now) {
-        var current = now.getHours() * 60 + now.getMinutes();
-        var active = null;
-        routineBlocks.forEach(function(mod) { mod.items.forEach(function(item) {
-            var parts = item.time.split(' - ');
-            var a = parts[0].split(':').map(Number), b = parts[1].split(':').map(Number);
-            var from = a[0] * 60 + a[1], to = b[0] * 60 + b[1];
-            if (to > from && current >= from && current < to) active = item;
-        }); });
+        var schedule = getSchedule(now);
+        var current = schedule.current;
+        var display = document.getElementById('pomo-display');
+        var mode = document.getElementById('pomo-mode-label');
         var info = document.getElementById('pomo-info-text');
-        if (info && !pomoDeadline && pomoState === 'idle')
-            info.innerText = active ? 'Şu anki plan: ' + active.title + ' — Başlat ile sayacı çalıştır.' : 'Başlat ile odaklanma oturumunu başlat.';
+        var button = document.getElementById('pomo-start-btn');
+        var slot = current && current.item;
+        var isTimed = slot && (slot.type === 'pomo' || slot.type === 'break');
+        var key = now.getFullYear() + '-' + (now.getMonth()+1) + '-' + now.getDate() + ':' + (slot ? slot.id : 'none');
+        if (lastScheduleKey !== key) {
+            if (lastScheduleKey && scheduleAlarmEnabled && isTimed && mutedScheduleKey !== key) triggerPersistentAlarm();
+            lastScheduleKey = key;
+            activeRoutineItemId = isTimed ? slot.id : null;
+            renderRoutine();
+        }
+        var secOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        if (isTimed) {
+            var endSeconds = current.end * 60;
+            if (endSeconds > 86400 && secOfDay < (endSeconds - 86400)) secOfDay += 86400;
+            pomoSeconds = Math.max(0, endSeconds - secOfDay);
+            pomoState = slot.type === 'break' ? 'break' : 'work';
+            display.innerText = formatCountdown(pomoSeconds);
+            mode.innerText = slot.type === 'break' ? 'Mola zamanı' : 'Odaklanma zamanı';
+            mode.style.color = slot.type === 'break' ? 'var(--accent-green)' : 'var(--accent-purple)';
+            info.innerText = slot.title + ' | ' + slot.time + ' — Günlük plana göre otomatik çalışıyor.';
+        } else if (schedule.next) {
+            var targetSeconds = schedule.nextDelta * 60 - now.getSeconds();
+            pomoSeconds = Math.max(0, targetSeconds);
+            pomoState = 'waiting';
+            display.innerText = formatCountdown(pomoSeconds);
+            mode.innerText = slot ? 'Planlanan etkinlik' : 'Sonraki plana kalan';
+            mode.style.color = 'var(--accent-blue)';
+            info.innerText = (slot ? 'Şimdi: ' + slot.title + ' | ' : '') + 'Sıradaki: ' + schedule.next.item.title + ' (' + schedule.next.item.time + ')';
+        } else {
+            display.innerText = '--:--';
+            mode.innerText = 'Plan bulunamadı';
+            info.innerText = 'Günlük rutin saatlerini kontrol et.';
+        }
+        button.innerText = scheduleAlarmEnabled ? 'Otomatik alarm: Açık' : 'Otomatik alarm: Kapalı';
     }
-
+    document.getElementById('pomo-start-btn').addEventListener('click', function() {
+        scheduleAlarmEnabled = !scheduleAlarmEnabled;
+        checkAutoRoutineTrigger(new Date());
+    });
+    document.getElementById('pomo-reset-btn').addEventListener('click', function() {
+        scheduleAlarmEnabled = false;
+        mutedScheduleKey = lastScheduleKey;
+        document.getElementById('alarm-banner').classList.remove('active');
+        if (activeAlarmAudio) { activeAlarmAudio.pause(); activeAlarmAudio = null; }
+        isAlarmPlaying = false;
+        checkAutoRoutineTrigger(new Date());
+    });
     // Otomatik Kaydırma (Günlük Rutin Aktif Satıra)
     function scrollToActiveRoutine() {
         setTimeout(() => {
@@ -1036,37 +1028,6 @@
             }
         }, 100);
     }
-
-    document.getElementById('pomo-start-btn').addEventListener('click', function() {
-        if (pomoDeadline) {
-            tickPomodoro();
-            if (!pomoDeadline) return;
-            clearInterval(pomoTimer); pomoTimer = null;
-            pomoDeadline = null; pomoPaused = true;
-            savePomo(); updatePomoUI(); return;
-        }
-        if (pomoPaused && pomoSeconds > 0) {
-            pomoDeadline = Date.now() + pomoSeconds * 1000;
-            pomoPaused = false;
-            savePomo(); updatePomoUI(); runPomoInterval(); return;
-        }
-        var target = null;
-        for (var i = 0; i < routineBlocks.length && !target; i++) {
-            for (var j = 0; j < routineBlocks[i].items.length; j++) {
-                var item = routineBlocks[i].items[j];
-                if (!item.completed && (item.type === 'pomo' || item.type === 'break')) { target = item; break; }
-            }
-        }
-        if (target) startPomodoroSession(target.duration || 25, target.id, target.title);
-        else startPomodoroSession(25, null, 'Serbest Çalışma (25 Dk)');
-    });
-    document.getElementById('pomo-reset-btn').addEventListener('click', function() {
-        if (pomoTimer) clearInterval(pomoTimer);
-        pomoTimer = null; pomoDeadline = null; pomoState = 'idle';
-        pomoSeconds = 1500; activeRoutineItemId = null;
-        pomoLabel = 'Hazır'; pomoPaused = false;
-        savePomo(); updatePomoUI(); renderRoutine();
-    });
 
     function renderRoutine() {
         const container = document.getElementById('routine-container');
@@ -1217,11 +1178,10 @@
     setInterval(updateClock, 1000);
     renderRoutine();
     renderCourses();
-    restorePomodoro();
     updateClock();
     scrollToActiveRoutine();
-    document.addEventListener('visibilitychange', function() { if (!document.hidden) { tickPomodoro(); updateClock(); } });
-    window.addEventListener('pageshow', function() { tickPomodoro(); updateClock(); });
+    document.addEventListener('visibilitychange', function() { if (!document.hidden) { updateClock(); } });
+    window.addEventListener('pageshow', function() { updateClock(); });
 </script>
 
 </body>
