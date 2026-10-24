@@ -79,10 +79,7 @@
         .card {
             background: #161b22;
             background: var(--card-bg);
-            /* Eski Android WebView için opak zemin */
-            backdrop-filter: none;
-            -webkit-/* Eski Android WebView için opak zemin */
-            backdrop-filter: none;
+            /* Eski Android WebView uyumluluğu için opak zemin */
             border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 20px;
@@ -255,13 +252,6 @@
             color: var(--accent-purple);
         }
 
-        .pomo-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
         /* BUTONLAR VE İSTATİSTİK */
         .btn {
             padding: 8px 16px;
@@ -340,35 +330,6 @@
             transition: width 0.4s ease;
         }
 
-        .switch-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--card-border);
-            font-size: 0.85rem;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
-
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #374151; transition: .3s; border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-            background-color: white; transition: .3s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--accent-blue); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
         /* SEKMELER (TABS) */
         .tab-header {
             display: flex;
@@ -408,43 +369,6 @@
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid var(--card-border);
-        }
-
-        /* Tam ekran panel düzeni: yalnızca listeler kendi içinde kayar */
-        html, body { height: 100%; overflow: hidden; }
-        body { height: 100vh; height: 100dvh; padding: 14px; }
-        .container {
-            height: 100%; max-height: 100%;
-            grid-template-rows: minmax(0, 1fr);
-            align-items: stretch;
-        }
-        .container > div { min-height: 0; display: flex; flex-direction: column; }
-        .container > div > .card { flex-shrink: 0; }
-        .container > div:first-child > .card:last-child {
-            flex: 1 1 auto; min-height: 0; margin-bottom: 0;
-            display: flex; flex-direction: column;
-        }
-        .tab-content.active { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-        .tab-content .scroll-area { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; overscroll-behavior: contain; }
-        .tab-header { flex-shrink: 0; }
-        .container > div:last-child > .card:last-child { margin-bottom: 0; }
-        body.projection-mode .container { height: 100%; }
-        @media (max-width: 991px) {
-            body { padding: 8px; }
-            .container { gap: 10px; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
-            .container > div:last-child { overflow-y: auto; overscroll-behavior: contain; }
-            .card { padding: 12px; margin-bottom: 10px; }
-            .tab-header { gap: 5px; }
-            .tab-btn { padding: 7px; font-size: 0.78rem; }
-            .clock-box h1 { font-size: 1.6rem; }
-        }
-        @media (max-height: 650px) and (min-width: 992px) {
-            body { padding: 7px; }
-            .container { gap: 10px; }
-            .card { padding: 10px; margin-bottom: 9px; }
-            .pomo-timer { font-size: 2.3rem; margin: 4px 0; }
-            .stats-grid { margin-top: 8px; }
-            .audio-test-row, .switch-box { margin-top: 6px; padding-top: 6px; }
         }
     </style>
 </head>
@@ -487,7 +411,7 @@
 
             <div id="tab-routine" class="tab-content active">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="color: var(--accent-blue);">Pomodoro Akışı</h3>
+                    <h3 style="color: var(--accent-blue);">Pazartesi / Pomodoro Akışı</h3>
                     <button class="btn" id="reset-routine-btn" style="padding: 4px 10px; font-size: 0.8rem;"><i data-lucide="rotate-ccw"></i> Rutini Sıfırla</button>
                 </div>
                 <div class="scroll-area" id="routine-container"></div>
@@ -508,14 +432,10 @@
         <div class="card pomodoro-card">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3><i data-lucide="timer"></i> Akıllı Pomodoro</h3>
-                <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600;">Hazır</span>
+                <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600;">Otomatik Senkron</span>
             </div>
-            <div class="pomo-timer" id="pomo-display">25:00</div>
-            <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Günlük plana göre otomatik senkronize çalışır.</p>
-            <div class="pomo-controls">
-                <button class="btn btn-primary" id="pomo-start-btn">Otomatik alarm: Kapalı</button>
-                <button class="btn" id="pomo-reset-btn"><i data-lucide="volume-x"></i> Alarmı Kapat</button>
-            </div>
+            <div class="pomo-timer" id="pomo-display">00:00</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Saat dilimine göre tam otomatik çalışır.</p>
         </div>
 
         <div class="card">
@@ -546,14 +466,6 @@
                 </div>
             </div>
 
-            <div class="switch-box">
-                <span><i data-lucide="volume-2"></i> Sesli Uyarılar</span>
-                <label class="switch">
-                    <input type="checkbox" id="sound-toggle" checked>
-                    <span class="slider"></span>
-                </label>
-            </div>
-
             <div class="audio-test-row">
                 <button class="btn" id="test-notif-btn" style="flex: 1; justify-content: center;"><i data-lucide="play"></i> Bildirim Test</button>
                 <button class="btn" id="test-alarm-btn" style="flex: 1; justify-content: center;"><i data-lucide="play"></i> Alarm Test</button>
@@ -567,7 +479,6 @@
 </div>
 
 <script>
-    // Harici ikon servisi çalışmasa bile sayfanın işlevleri devam eder.
     function safeIcons() {
         try {
             if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
@@ -580,31 +491,31 @@
     function writeStore(key, value) {
         try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
     }
-    let activeAlarmAudio = null;
-    let isAlarmPlaying = false;
 
-    function playAudio(type = 'notif') {
-        const soundEnabled = document.getElementById('sound-toggle').checked;
-        if (!soundEnabled) return;
+    var activeAlarmAudio = null;
+    var isAlarmPlaying = false;
+    var lastTriggeredSlotId = null;
 
-        const fileName = (type === 'alarm') ? 'alarm.mp3' : 'bildirim.mp3';
+    function playAudio(type) {
+        if (!type) type = 'notif';
+        var fileName = (type === 'alarm') ? 'alarm.mp3' : 'bildirim.mp3';
 
         try {
-            const audio = new Audio(fileName);
+            var audio = new Audio(fileName);
             if (type === 'alarm') {
                 if (isAlarmPlaying) return;
                 isAlarmPlaying = true;
                 activeAlarmAudio = audio;
 
-                audio.play().catch(err => {
+                audio.play().catch(function(err) {
                     console.log("Alarm çalınamadı:", err);
                     isAlarmPlaying = false;
                 });
 
-                audio.onended = () => {
+                audio.onended = function() {
                     isAlarmPlaying = false;
                     if (document.getElementById('alarm-banner').classList.contains('active')) {
-                        setTimeout(() => {
+                        setTimeout(function() {
                             if (document.getElementById('alarm-banner').classList.contains('active')) {
                                 playAudio('alarm');
                             }
@@ -612,7 +523,7 @@
                     }
                 };
             } else {
-                audio.play().catch(err => console.log("Bildirim çalınamadı:", err));
+                audio.play().catch(function(err) { console.log("Bildirim çalınamadı:", err); });
             }
         } catch (e) {
             console.log("Ses hatası:", e);
@@ -620,8 +531,8 @@
         }
     }
 
-    document.getElementById('test-notif-btn').addEventListener('click', () => playAudio('notif'));
-    document.getElementById('test-alarm-btn').addEventListener('click', () => {
+    document.getElementById('test-notif-btn').addEventListener('click', function() { playAudio('notif'); });
+    document.getElementById('test-alarm-btn').addEventListener('click', function() {
         document.getElementById('alarm-banner').classList.add('active');
         playAudio('alarm');
     });
@@ -631,7 +542,7 @@
         playAudio('alarm');
     }
 
-    document.getElementById('btn-stop-alarm').addEventListener('click', () => {
+    document.getElementById('btn-stop-alarm').addEventListener('click', function() {
         document.getElementById('alarm-banner').classList.remove('active');
         if (activeAlarmAudio) {
             activeAlarmAudio.pause();
@@ -641,8 +552,11 @@
     });
 
     function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        var contents = document.querySelectorAll('.tab-content');
+        for (var i = 0; i < contents.length; i++) contents[i].classList.remove('active');
+        
+        var btns = document.querySelectorAll('.tab-btn');
+        for (var j = 0; j < btns.length; j++) btns[j].classList.remove('active');
         
         if (tabName === 'routine') {
             document.getElementById('tab-routine').classList.add('active');
@@ -657,7 +571,7 @@
     }
 
     // RUTİN BLOKLARI
-    const routineBlocks = [
+    var routineBlocks = [
         { title: "Sabah Hazırlığı", items: [
             { id: 'r1', type: 'normal', time: "07:00 - 07:30", title: "Uyanış ve Egzersiz (10 Şınav, 10 Mekik)", completed: false },
             { id: 'r2', type: 'normal', time: "07:30 - 08:30", title: "Kahvaltı & Güne Hazırlık", completed: false }
@@ -706,7 +620,7 @@
             { id: 'r35', type: 'pomo', duration: 25, time: "19:00 - 19:25", title: "Pomo 2: Proje Geliştirme", completed: false },
             { id: 'r36', type: 'break', duration: 5, time: "19:25 - 19:30", title: "Mola 2", completed: false },
             { id: 'r37', type: 'pomo', duration: 25, time: "19:30 - 19:55", title: "Pomo 3: Proje Geliştirme", completed: false },
-            { id: 'r38', type: 'break', duration: 5, time: "19:55 - 20:00", title: "Mola 3", completed: false },
+            { id: 38, type: 'break', duration: 5, time: "19:55 - 20:00", title: "Mola 3", completed: false },
             { id: 'r39', type: 'normal', time: "20:00 - 20:30", title: "Günlük Notlar ve Kapanış", completed: false }
         ]},
         { title: "Akşam Kapanışı", items: [
@@ -717,7 +631,7 @@
     ];
 
     // EĞİTİM PLANI (157 DERS)
-    const courseModules = [
+    var courseModules = [
         { title: "1. Giriş", items: [
             { id: 1, time: "00:02:08", title: "1.1_Tanıtım", completed: true },
             { id: 2, time: "00:07:49", title: "1.2_Bilgilendirme", completed: true }
@@ -911,31 +825,33 @@
         ]}
     ];
 
-    let savedRoutine = readStore('routine_progress_v5', {});
-    let savedCourses = readStore('course_progress_v5', {});
+    var savedRoutine = readStore('routine_progress_v5', {});
+    var savedCourses = readStore('course_progress_v5', {});
 
-    routineBlocks.forEach(mod => {
-        mod.items.forEach(item => {
+    for (var i = 0; i < routineBlocks.length; i++) {
+        for (var j = 0; j < routineBlocks[i].items.length; j++) {
+            var item = routineBlocks[i].items[j];
             if (savedRoutine[item.id] !== undefined) item.completed = savedRoutine[item.id];
-        });
-    });
+        }
+    }
 
-    courseModules.forEach(mod => {
-        mod.items.forEach(item => {
-            if (savedCourses[item.id] !== undefined) item.completed = savedCourses[item.id];
-        });
-    });
+    for (var k = 0; k < courseModules.length; k++) {
+        for (var m = 0; m < courseModules[k].items.length; m++) {
+            var cItem = courseModules[k].items[m];
+            if (savedCourses[cItem.id] !== undefined) cItem.completed = savedCourses[cItem.id];
+        }
+    }
 
     // Projeksiyon Modu
-    const projBtn = document.getElementById('projection-toggle-btn');
-    let isProjectionMode = localStorage.getItem('projectionMode') === 'true';
+    var projBtn = document.getElementById('projection-toggle-btn');
+    var isProjectionMode = localStorage.getItem('projectionMode') === 'true';
     if (isProjectionMode) {
         document.getElementById('body').classList.add('projection-mode');
         projBtn.style.background = 'var(--accent-green)';
         projBtn.style.color = '#000';
     }
 
-    projBtn.addEventListener('click', () => {
+    projBtn.addEventListener('click', function() {
         isProjectionMode = !isProjectionMode;
         document.getElementById('body').classList.toggle('projection-mode', isProjectionMode);
         localStorage.setItem('projectionMode', isProjectionMode);
@@ -944,277 +860,278 @@
     });
 
     function updateClock() {
-        const now = new Date();
+        var now = new Date();
         document.getElementById('clock').innerText = now.toLocaleTimeString('tr-TR');
         document.getElementById('date-display').innerText = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         
-        checkAutoRoutineTrigger(now);
+        syncAutoPomodoro(now);
     }
 
-    // Saat bazlı plan motoru: açılış zamanından bağımsız, her zaman takvimle senkron.
-    var pomoTimer = null;
-    var pomoSeconds = 0;
-    var pomoState = 'idle';
     var activeRoutineItemId = null;
-    var lastScheduleKey = '';
-    var mutedScheduleKey = '';
-    var scheduleAlarmEnabled = false;
-    function pad2(n) { return ('0' + n).slice(-2); }
-    function formatCountdown(seconds) {
-        seconds = Math.max(0, Math.ceil(seconds));
-        var h = Math.floor(seconds / 3600);
-        var m = Math.floor((seconds % 3600) / 60);
-        var sec = seconds % 60;
-        return (h ? pad2(h) + ':' : '') + pad2(m) + ':' + pad2(sec);
-    }
-    function getSchedule(now) {
-        var minute = now.getHours() * 60 + now.getMinutes();
-        var all = [];
-        routineBlocks.forEach(function(group) {
-            group.items.forEach(function(item) {
-                var t = item.time.split(' - ');
-                if (t.length !== 2) return;
-                var a = t[0].split(':'); var b = t[1].split(':');
-                var start = Number(a[0]) * 60 + Number(a[1]);
-                var end = Number(b[0]) * 60 + Number(b[1]);
-                if (end <= start) end += 1440;
-                all.push({item:item, start:start, end:end});
-            });
-        });
-        var current = null, next = null, nextDelta = Infinity;
-        all.forEach(function(slot) {
-            var offset = minute;
-            if (slot.end > 1440 && minute < slot.end - 1440) offset += 1440;
-            if (offset >= slot.start && offset < slot.end) current = slot;
-            var delta = (slot.start - minute + 1440) % 1440;
-            if (delta === 0) delta = 1440;
-            if (delta < nextDelta) { nextDelta = delta; next = slot; }
-        });
-        return {current:current, next:next, nextDelta:nextDelta};
-    }
-    function checkAutoRoutineTrigger(now) {
-        var schedule = getSchedule(now);
-        var current = schedule.current;
-        var display = document.getElementById('pomo-display');
-        var mode = document.getElementById('pomo-mode-label');
-        var info = document.getElementById('pomo-info-text');
-        var button = document.getElementById('pomo-start-btn');
-        var slot = current && current.item;
-        var isTimed = slot && (slot.type === 'pomo' || slot.type === 'break');
-        var key = now.getFullYear() + '-' + (now.getMonth()+1) + '-' + now.getDate() + ':' + (slot ? slot.id : 'none');
-        if (lastScheduleKey !== key) {
-            if (lastScheduleKey && scheduleAlarmEnabled && isTimed && mutedScheduleKey !== key) triggerPersistentAlarm();
-            lastScheduleKey = key;
-            activeRoutineItemId = isTimed ? slot.id : null;
-            renderRoutine();
+
+    // OTOMATİK AKILLI POMODORO SENKRONİZASYONU
+    function syncAutoPomodoro(now) {
+        var currentMinutes = now.getHours() * 60 + now.getMinutes();
+        var currentSeconds = now.getSeconds();
+
+        var activeSlot = null;
+
+        for (var i = 0; i < routineBlocks.length; i++) {
+            for (var j = 0; j < routineBlocks[i].items.length; j++) {
+                var item = routineBlocks[i].items[j];
+                var parts = item.time.split(' - ');
+                var startParts = parts[0].split(':').map(Number);
+                var endParts = parts[1].split(':').map(Number);
+                
+                var startMin = startParts[0] * 60 + startParts[1];
+                var endMin = endParts[0] * 60 + endParts[1];
+
+                if (endMin > startMin && currentMinutes >= startMin && currentMinutes < endMin) {
+                    activeSlot = {
+                        item: item,
+                        startMin: startMin,
+                        endMin: endMin
+                    };
+                    break;
+                }
+            }
+            if (activeSlot) break;
         }
-        var secOfDay = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-        if (isTimed) {
-            var endSeconds = current.end * 60;
-            if (endSeconds > 86400 && secOfDay < (endSeconds - 86400)) secOfDay += 86400;
-            pomoSeconds = Math.max(0, endSeconds - secOfDay);
-            pomoState = slot.type === 'break' ? 'break' : 'work';
-            display.innerText = formatCountdown(pomoSeconds);
-            mode.innerText = slot.type === 'break' ? 'Mola zamanı' : 'Odaklanma zamanı';
-            mode.style.color = slot.type === 'break' ? 'var(--accent-green)' : 'var(--accent-purple)';
-            info.innerText = slot.title + ' | ' + slot.time + ' — Günlük plana göre otomatik çalışıyor.';
-        } else if (schedule.next) {
-            var targetSeconds = schedule.nextDelta * 60 - now.getSeconds();
-            pomoSeconds = Math.max(0, targetSeconds);
-            pomoState = 'waiting';
-            display.innerText = formatCountdown(pomoSeconds);
-            mode.innerText = slot ? 'Planlanan etkinlik' : 'Sonraki plana kalan';
-            mode.style.color = 'var(--accent-blue)';
-            info.innerText = (slot ? 'Şimdi: ' + slot.title + ' | ' : '') + 'Sıradaki: ' + schedule.next.item.title + ' (' + schedule.next.item.time + ')';
+
+        var displayEl = document.getElementById('pomo-display');
+        var labelEl = document.getElementById('pomo-mode-label');
+        var infoEl = document.getElementById('pomo-info-text');
+
+        if (activeSlot) {
+            activeRoutineItemId = activeSlot.item.id;
+
+            var totalSlotSeconds = (activeSlot.endMin - activeSlot.startMin) * 60;
+            var elapsedSeconds = ((currentMinutes - activeSlot.startMin) * 60) + currentSeconds;
+            var remainingSeconds = Math.max(0, totalSlotSeconds - elapsedSeconds);
+
+            var m = String(Math.floor(remainingSeconds / 60));
+            if (m.length < 2) m = '0' + m;
+            var sec = String(remainingSeconds % 60);
+            if (sec.length < 2) sec = '0' + sec;
+
+            displayEl.innerText = m + ':' + sec;
+            labelEl.innerText = activeSlot.item.title;
+
+            if (activeSlot.item.type === 'break') {
+                labelEl.style.color = 'var(--accent-green)';
+            } else {
+                labelEl.style.color = 'var(--accent-purple)';
+            }
+
+            infoEl.innerText = "Şu anki dilim otomatik senkronize çalışıyor.";
+
+            // Süre bittiğinde (son saniyelerde) otomatik tamamla ve alarm ver
+            if (remainingSeconds <= 1) {
+                if (lastTriggeredSlotId !== activeSlot.item.id) {
+                    lastTriggeredSlotId = activeSlot.item.id;
+                    toggleRoutine(activeSlot.item.id, true);
+                    triggerPersistentAlarm();
+                }
+            }
         } else {
-            display.innerText = '--:--';
-            mode.innerText = 'Plan bulunamadı';
-            info.innerText = 'Günlük rutin saatlerini kontrol et.';
+            activeRoutineItemId = null;
+            displayEl.innerText = "00:00";
+            labelEl.innerText = "Serbest Zaman";
+            labelEl.style.color = "var(--text-muted)";
+            infoEl.innerText = "Şu an tanımlı bir rutin dilimi bulunmuyor.";
         }
-        button.innerText = scheduleAlarmEnabled ? 'Otomatik alarm: Açık' : 'Otomatik alarm: Kapalı';
+
+        renderRoutineHighlights();
     }
-    document.getElementById('pomo-start-btn').addEventListener('click', function() {
-        scheduleAlarmEnabled = !scheduleAlarmEnabled;
-        checkAutoRoutineTrigger(new Date());
-    });
-    document.getElementById('pomo-reset-btn').addEventListener('click', function() {
-        scheduleAlarmEnabled = false;
-        mutedScheduleKey = lastScheduleKey;
-        document.getElementById('alarm-banner').classList.remove('active');
-        if (activeAlarmAudio) { activeAlarmAudio.pause(); activeAlarmAudio = null; }
-        isAlarmPlaying = false;
-        checkAutoRoutineTrigger(new Date());
-    });
-    // Yalnızca panelin içini kaydır; sayfanın kendisi hareket etmesin.
-    function centerInsidePanel(panel, target) {
-        if (!panel || !target) return;
-        var panelRect = panel.getBoundingClientRect();
-        var targetRect = target.getBoundingClientRect();
-        var delta = (targetRect.top + targetRect.height / 2) - (panelRect.top + panel.clientHeight / 2);
-        panel.scrollTop += delta;
+
+    function renderRoutineHighlights() {
+        var items = document.querySelectorAll('.routine-item');
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.remove('active-pomo-row');
+        }
+        if (activeRoutineItemId) {
+            var activeEl = document.getElementById('item-' + activeRoutineItemId);
+            if (activeEl) {
+                activeEl.classList.add('active-pomo-row');
+            }
+        }
     }
+
     // Otomatik Kaydırma (Günlük Rutin Aktif Satıra)
     function scrollToActiveRoutine() {
-        setTimeout(() => {
-            const panel = document.getElementById('routine-container');
-            const activeRow = panel.querySelector('.routine-item.active-pomo-row') || panel.querySelector('.routine-item:not(.completed)');
+        setTimeout(function() {
+            var activeRow = document.querySelector('.routine-item.active-pomo-row');
             if (activeRow) {
-                try { centerInsidePanel(document.getElementById("routine-container"), activeRow); } catch (e) {}
+                try { activeRow.scrollIntoView(false); } catch (e) {}
             }
         }, 100);
     }
 
     // Otomatik Kaydırma (Eğitim Planı Son Kalınan Yere)
     function scrollToLastCourse() {
-        setTimeout(() => {
-            const container = document.getElementById('course-container');
-            const firstUncompleted = container.querySelector('.routine-item:not(.completed)');
+        setTimeout(function() {
+            var container = document.getElementById('course-container');
+            var firstUncompleted = container.querySelector('.routine-item:not(.completed)');
             if (firstUncompleted) {
-                try { centerInsidePanel(container, firstUncompleted); } catch (e) {}
+                try { firstUncompleted.scrollIntoView(false); } catch (e) {}
             }
         }, 100);
     }
 
     function renderRoutine() {
-        const container = document.getElementById('routine-container');
+        var container = document.getElementById('routine-container');
         container.innerHTML = '';
 
-        routineBlocks.forEach(mod => {
-            const header = document.createElement('div');
+        for (var i = 0; i < routineBlocks.length; i++) {
+            var mod = routineBlocks[i];
+            var header = document.createElement('div');
             header.className = 'section-title';
-            header.innerHTML = `<i data-lucide="list-checks" style="width:16px;"></i> ${mod.title}`;
+            header.innerHTML = '<i data-lucide="list-checks" style="width:16px;"></i> ' + mod.title;
             container.appendChild(header);
 
-            mod.items.forEach(item => {
-                const isActivePomo = (activeRoutineItemId === item.id);
-                const div = document.createElement('div');
-                div.className = `routine-item ${item.completed ? 'completed' : ''} ${isActivePomo ? 'active-pomo-row' : ''}`;
-                div.innerHTML = `
-                    <div class="item-info">
-                        <span class="item-time">${item.time}</span>
-                        <span class="item-title">${item.title} ${isActivePomo ? '🟢 (Çalışılıyor)' : ''}</span>
-                    </div>
-                    <div class="action-box">
-                        <button class="check-btn" onclick="toggleRoutine('${item.id}')">
-                            ${item.completed ? '<i data-lucide="check"></i>' : ''}
-                        </button>
-                    </div>
-                `;
+            for (var j = 0; j < mod.items.length; j++) {
+                var item = mod.items[j];
+                var isActivePomo = (activeRoutineItemId === item.id);
+                var div = document.createElement('div');
+                div.id = 'item-' + item.id;
+                div.className = 'routine-item ' + (item.completed ? 'completed ' : '') + (isActivePomo ? 'active-pomo-row' : '');
+                div.innerHTML = 
+                    '<div class="item-info">' +
+                        '<span class="item-time">' + item.time + '</span>' +
+                        '<span class="item-title">' + item.title + '</span>' +
+                    '</div>' +
+                    '<div class="action-box">' +
+                        '<button class="check-btn" onclick="toggleRoutine(\'' + item.id + '\')">' +
+                            (item.completed ? '<i data-lucide="check"></i>' : '') +
+                        '</button>' +
+                    '</div>';
                 container.appendChild(div);
-            });
-        });
+            }
+        }
         safeIcons();
         updateStats();
     }
 
-    function toggleRoutine(id, forcedState = null) {
-        routineBlocks.forEach(mod => {
-            mod.items.forEach(item => {
+    function toggleRoutine(id, forcedState) {
+        if (forcedState === undefined) forcedState = null;
+        for (var i = 0; i < routineBlocks.length; i++) {
+            for (var j = 0; j < routineBlocks[i].items.length; j++) {
+                var item = routineBlocks[i].items[j];
                 if (item.id === id) {
                     item.completed = forcedState !== null ? forcedState : !item.completed;
                     savedRoutine[id] = item.completed;
                 }
-            });
-        });
+            }
+        }
         writeStore('routine_progress_v5', savedRoutine);
         renderRoutine();
     }
 
     function renderCourses() {
-        const container = document.getElementById('course-container');
+        var container = document.getElementById('course-container');
         container.innerHTML = '';
 
-        courseModules.forEach(mod => {
-            const header = document.createElement('div');
+        for (var i = 0; i < courseModules.length; i++) {
+            var mod = courseModules[i];
+            var header = document.createElement('div');
             header.className = 'section-title';
-            header.innerHTML = `<i data-lucide="folder" style="width:16px;"></i> ${mod.title}`;
+            header.innerHTML = '<i data-lucide="folder" style="width:16px;"></i> ' + mod.title;
             container.appendChild(header);
 
-            mod.items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = `routine-item ${item.completed ? 'completed' : ''}`;
-                div.innerHTML = `
-                    <div class="item-info">
-                        <span class="item-time">${item.time}</span>
-                        <span class="item-title">${item.title}</span>
-                    </div>
-                    <div class="action-box">
-                        <button class="check-btn" onclick="toggleCourse(${item.id})">
-                            ${item.completed ? '<i data-lucide="check"></i>' : ''}
-                        </button>
-                    </div>
-                `;
+            for (var j = 0; j < mod.items.length; j++) {
+                var item = mod.items[j];
+                var div = document.createElement('div');
+                div.className = 'routine-item ' + (item.completed ? 'completed' : '');
+                div.innerHTML = 
+                    '<div class="item-info">' +
+                        '<span class="item-time">' + item.time + '</span>' +
+                        '<span class="item-title">' + item.title + '</span>' +
+                    '</div>' +
+                    '<div class="action-box">' +
+                        '<button class="check-btn" onclick="toggleCourse(' + item.id + ')">' +
+                            (item.completed ? '<i data-lucide="check"></i>' : '') +
+                        '</button>' +
+                    '</div>';
                 container.appendChild(div);
-            });
-        });
+            }
+        }
 
         safeIcons();
         updateStats();
     }
 
     function toggleCourse(id) {
-        courseModules.forEach(mod => {
-            mod.items.forEach(item => {
+        for (var i = 0; i < courseModules.length; i++) {
+            for (var j = 0; j < courseModules[i].items.length; j++) {
+                var item = courseModules[i].items[j];
                 if (item.id === id) {
                     item.completed = !item.completed;
                     savedCourses[id] = item.completed;
                 }
-            });
-        });
+            }
+        }
 
         writeStore('course_progress_v5', savedCourses);
         renderCourses();
     }
 
     function updateStats() {
-        let routineTotal = 0;
-        let routineCompleted = 0;
-        routineBlocks.forEach(mod => {
-            mod.items.forEach(item => {
+        var routineTotal = 0;
+        var routineCompleted = 0;
+        for (var i = 0; i < routineBlocks.length; i++) {
+            for (var j = 0; j < routineBlocks[i].items.length; j++) {
                 routineTotal++;
-                if (item.completed) routineCompleted++;
-            });
-        });
-        const routineRate = routineTotal > 0 ? Math.round((routineCompleted / routineTotal) * 100) : 0;
+                if (routineBlocks[i].items[j].completed) routineCompleted++;
+            }
+        }
+        var routineRate = routineTotal > 0 ? Math.round((routineCompleted / routineTotal) * 100) : 0;
 
-        let courseTotal = 0;
-        let courseCompleted = 0;
-        courseModules.forEach(mod => {
-            mod.items.forEach(item => {
+        var courseTotal = 0;
+        var courseCompleted = 0;
+        for (var k = 0; k < courseModules.length; k++) {
+            for (var m = 0; m < courseModules[k].items.length; m++) {
                 courseTotal++;
-                if (item.completed) courseCompleted++;
-            });
-        });
-        const courseRate = courseTotal > 0 ? Math.round((courseCompleted / courseTotal) * 100) : 0;
+                if (courseModules[k].items[m].completed) courseCompleted++;
+            }
+        }
+        var courseRate = courseTotal > 0 ? Math.round((courseCompleted / courseTotal) * 100) : 0;
 
-        const overallRate = Math.round((routineRate + courseRate) / 2);
+        var overallRate = Math.round((routineRate + courseRate) / 2);
 
-        document.getElementById('stat-routine-rate').innerText = `${routineRate}%`;
-        document.getElementById('stat-completed-count').innerText = `${courseCompleted} / ${courseTotal}`;
-        document.getElementById('stat-rate').innerText = `${overallRate}%`;
-        document.getElementById('progress-text').innerText = `${courseRate}%`;
-        document.getElementById('progress-fill').style.width = `${courseRate}%`;
+        document.getElementById('stat-routine-rate').innerText = routineRate + '%';
+        document.getElementById('stat-completed-count').innerText = courseCompleted + ' / ' + courseTotal;
+        document.getElementById('stat-rate').innerText = overallRate + '%';
+        document.getElementById('progress-text').innerText = courseRate + '%';
+        document.getElementById('progress-fill').style.width = courseRate + '%';
     }
 
-    document.getElementById('reset-routine-btn').addEventListener('click', () => {
+    document.getElementById('reset-routine-btn').addEventListener('click', function() {
         if (confirm("Günlük rutini sıfırlamak istediğinize emin misiniz?")) {
-            routineBlocks.forEach(mod => { mod.items.forEach(item => { item.completed = false; }); });
+            for (var i = 0; i < routineBlocks.length; i++) {
+                for (var j = 0; j < routineBlocks[i].items.length; j++) {
+                    routineBlocks[i].items[j].completed = false;
+                }
+            }
             savedRoutine = {};
             localStorage.removeItem('routine_progress_v5');
             renderRoutine();
         }
     });
 
-    document.getElementById('reset-courses-btn').addEventListener('click', () => {
+    document.getElementById('reset-courses-btn').addEventListener('click', function() {
         if (confirm("Eğitim ilerlemelerini sıfırlamak istediğinize emin misiniz?")) {
-            courseModules.forEach(mod => { mod.items.forEach(item => { item.completed = false; }); });
+            for (var i = 0; i < courseModules.length; i++) {
+                for (var j = 0; j < courseModules[i].items.length; j++) {
+                    courseModules[i].items[j].completed = false;
+                }
+            }
             savedCourses = {};
             localStorage.removeItem('course_progress_v5');
             renderCourses();
         }
     });
 
-    document.getElementById('clear-all-btn').addEventListener('click', () => {
+    document.getElementById('clear-all-btn').addEventListener('click', function() {
         if (confirm("Tüm verileriniz tamamen silinecek. Emin misiniz?")) {
             localStorage.clear();
             location.reload();
