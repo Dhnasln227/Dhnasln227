@@ -48,7 +48,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
-            /* Dokunma vurgularını ve nokta nokta odaklanma çerçevelerini kaldırma */
             outline: none !important;
             -webkit-tap-highlight-color: transparent !important;
         }
@@ -75,11 +74,17 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
+            align-items: start; /* Sağ ve sol kolonların hizalanması */
         }
 
         @media (min-width: 992px) {
             .container {
                 grid-template-columns: 1.8fr 1.2fr;
+            }
+            /* Sağ kolonun sabit kalması (Genel ilerleme durumunun kaybolmaması için) */
+            .right-column {
+                position: sticky;
+                top: 20px;
             }
         }
 
@@ -436,8 +441,8 @@
         </div>
     </div>
 
-    <!-- SAĞ KOLON: AKILLI POMODORO VE İSTATİSTİKLER -->
-    <div>
+    <!-- SAĞ KOLON: AKILLI POMODORO VE İSTATİSTİKLER (SABİT / STICKY) -->
+    <div class="right-column">
         <div class="card pomodoro-card">
             <div style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
                 <h3 id="pomo-card-title"><i data-lucide="timer"></i> Yükleniyor...</h3>
@@ -531,7 +536,7 @@
             if (type === 'alarm') {
                 if (isAlarmPlaying) return;
                 isAlarmPlaying = true;
-                audio.loop = true; // Alarm durdurulana kadar döngüsel olarak çalar
+                audio.loop = true;
                 activeAlarmAudio = audio;
 
                 audio.play().catch(function(err) {
@@ -934,7 +939,6 @@
 
             displayEl.innerText = m + ':' + sec;
             
-            // Başlık alanına o anki planın adı atanır
             cardTitleEl.innerHTML = '<i data-lucide="timer"></i> ' + activeSlot.item.title;
 
             if (activeSlot.item.type === 'break') {
@@ -950,7 +954,6 @@
 
             infoEl.innerText = "Anlık zaman dilimi otomatik senkronize ediliyor.";
 
-            // Süre tamamlandığında otomatik işaretleme ve sürekli alarm
             if (remainingSeconds <= 1) {
                 if (lastTriggeredSlotId !== activeSlot.item.id) {
                     lastTriggeredSlotId = activeSlot.item.id;
@@ -984,23 +987,22 @@
         }
     }
 
-    // Otomatik Kaydırma (Günlük Rutin Aktif Satıra)
+    // Otomatik Kaydırma (Sadece sekme değiştirildiğinde çalışır, sayfanın aşağı kaymasını engeller)
     function scrollToActiveRoutine() {
         setTimeout(function() {
             var activeRow = document.querySelector('.routine-item.active-pomo-row');
             if (activeRow) {
-                try { activeRow.scrollIntoView(false); } catch (e) {}
+                try { activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
             }
         }, 100);
     }
 
-    // Otomatik Kaydırma (Eğitim Planı Son Kalınan Yere)
     function scrollToLastCourse() {
         setTimeout(function() {
             var container = document.getElementById('course-container');
             var firstUncompleted = container.querySelector('.routine-item:not(.completed)');
             if (firstUncompleted) {
-                try { firstUncompleted.scrollIntoView(false); } catch (e) {}
+                try { firstUncompleted.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
             }
         }, 100);
     }
@@ -1169,7 +1171,6 @@
     renderRoutine();
     renderCourses();
     updateClock();
-    scrollToActiveRoutine();
     document.addEventListener('visibilitychange', function() { if (!document.hidden) { updateClock(); } });
     window.addEventListener('pageshow', function() { updateClock(); });
 </script>
