@@ -48,6 +48,13 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
+            /* Dokunma vurgularını ve nokta nokta odaklanma çerçevelerini kaldırma */
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        *:focus {
+            outline: none !important;
         }
 
         body {
@@ -79,7 +86,6 @@
         .card {
             background: #161b22;
             background: var(--card-bg);
-            /* Eski Android WebView uyumluluğu için opak zemin */
             border: 1px solid var(--card-border);
             border-radius: 16px;
             padding: 20px;
@@ -383,6 +389,9 @@
                 <p id="date-display">Yükleniyor...</p>
             </div>
             <div class="top-controls">
+                <button class="btn" id="fullscreen-btn" title="Tam Ekran Yap">
+                    <i data-lucide="maximize"></i> Tam Ekran
+                </button>
                 <button class="btn btn-primary" id="projection-toggle-btn" title="BYINTEK P70 Projeksiyon Modu">
                     <i data-lucide="projector"></i> P70 Modu
                 </button>
@@ -430,9 +439,9 @@
     <!-- SAĞ KOLON: AKILLI POMODORO VE İSTATİSTİKLER -->
     <div>
         <div class="card pomodoro-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3><i data-lucide="timer"></i> Akıllı Pomodoro</h3>
-                <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600;">Otomatik Senkron</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
+                <h3 id="pomo-card-title"><i data-lucide="timer"></i> Yükleniyor...</h3>
+                <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600; white-space:nowrap;">Otomatik</span>
             </div>
             <div class="pomo-timer" id="pomo-display">00:00</div>
             <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Saat dilimine göre tam otomatik çalışır.</p>
@@ -496,6 +505,23 @@
     var isAlarmPlaying = false;
     var lastTriggeredSlotId = null;
 
+    // Tam Ekran Düğmesi (Samsung Tab 3 Lite Uyumluluğu)
+    document.getElementById('fullscreen-btn').addEventListener('click', function() {
+        var doc = document.documentElement;
+        if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
+            if (doc.requestFullscreen) doc.requestFullscreen();
+            else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+            else if (doc.mozRequestFullScreen) doc.mozRequestFullScreen();
+            else if (doc.msRequestFullscreen) doc.msRequestFullscreen();
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
+        }
+    });
+
+    // Ses Çalma Fonksiyonu (Kesintisiz Sürekli Alarm Desteği)
     function playAudio(type) {
         if (!type) type = 'notif';
         var fileName = (type === 'alarm') ? 'alarm.mp3' : 'bildirim.mp3';
@@ -505,23 +531,13 @@
             if (type === 'alarm') {
                 if (isAlarmPlaying) return;
                 isAlarmPlaying = true;
+                audio.loop = true; // Alarm durdurulana kadar döngüsel olarak çalar
                 activeAlarmAudio = audio;
 
                 audio.play().catch(function(err) {
                     console.log("Alarm çalınamadı:", err);
                     isAlarmPlaying = false;
                 });
-
-                audio.onended = function() {
-                    isAlarmPlaying = false;
-                    if (document.getElementById('alarm-banner').classList.contains('active')) {
-                        setTimeout(function() {
-                            if (document.getElementById('alarm-banner').classList.contains('active')) {
-                                playAudio('alarm');
-                            }
-                        }, 3000);
-                    }
-                };
             } else {
                 audio.play().catch(function(err) { console.log("Bildirim çalınamadı:", err); });
             }
@@ -546,6 +562,7 @@
         document.getElementById('alarm-banner').classList.remove('active');
         if (activeAlarmAudio) {
             activeAlarmAudio.pause();
+            activeAlarmAudio.currentTime = 0;
             activeAlarmAudio = null;
         }
         isAlarmPlaying = false;
@@ -620,7 +637,7 @@
             { id: 'r35', type: 'pomo', duration: 25, time: "19:00 - 19:25", title: "Pomo 2: Proje Geliştirme", completed: false },
             { id: 'r36', type: 'break', duration: 5, time: "19:25 - 19:30", title: "Mola 2", completed: false },
             { id: 'r37', type: 'pomo', duration: 25, time: "19:30 - 19:55", title: "Pomo 3: Proje Geliştirme", completed: false },
-            { id: 38, type: 'break', duration: 5, time: "19:55 - 20:00", title: "Mola 3", completed: false },
+            { id: 'r38', type: 'break', duration: 5, time: "19:55 - 20:00", title: "Mola 3", completed: false },
             { id: 'r39', type: 'normal', time: "20:00 - 20:30", title: "Günlük Notlar ve Kapanış", completed: false }
         ]},
         { title: "Akşam Kapanışı", items: [
@@ -899,6 +916,7 @@
         }
 
         var displayEl = document.getElementById('pomo-display');
+        var cardTitleEl = document.getElementById('pomo-card-title');
         var labelEl = document.getElementById('pomo-mode-label');
         var infoEl = document.getElementById('pomo-info-text');
 
@@ -915,17 +933,24 @@
             if (sec.length < 2) sec = '0' + sec;
 
             displayEl.innerText = m + ':' + sec;
-            labelEl.innerText = activeSlot.item.title;
+            
+            // Başlık alanına o anki planın adı atanır
+            cardTitleEl.innerHTML = '<i data-lucide="timer"></i> ' + activeSlot.item.title;
 
             if (activeSlot.item.type === 'break') {
+                labelEl.innerText = "Mola / Dinlenme";
                 labelEl.style.color = 'var(--accent-green)';
-            } else {
+            } else if (activeSlot.item.type === 'pomo') {
+                labelEl.innerText = "Odaklanma";
                 labelEl.style.color = 'var(--accent-purple)';
+            } else {
+                labelEl.innerText = "Genel Plan";
+                labelEl.style.color = 'var(--accent-blue)';
             }
 
-            infoEl.innerText = "Şu anki dilim otomatik senkronize çalışıyor.";
+            infoEl.innerText = "Anlık zaman dilimi otomatik senkronize ediliyor.";
 
-            // Süre bittiğinde (son saniyelerde) otomatik tamamla ve alarm ver
+            // Süre tamamlandığında otomatik işaretleme ve sürekli alarm
             if (remainingSeconds <= 1) {
                 if (lastTriggeredSlotId !== activeSlot.item.id) {
                     lastTriggeredSlotId = activeSlot.item.id;
@@ -936,11 +961,13 @@
         } else {
             activeRoutineItemId = null;
             displayEl.innerText = "00:00";
-            labelEl.innerText = "Serbest Zaman";
+            cardTitleEl.innerHTML = '<i data-lucide="timer"></i> Serbest Zaman';
+            labelEl.innerText = "Boşta";
             labelEl.style.color = "var(--text-muted)";
             infoEl.innerText = "Şu an tanımlı bir rutin dilimi bulunmuyor.";
         }
 
+        safeIcons();
         renderRoutineHighlights();
     }
 
