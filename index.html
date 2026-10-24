@@ -33,11 +33,6 @@
             font-size: 1.2rem;
         }
 
-        body.projection-mode .container {
-            max-width: 100% !important;
-            padding: 10px;
-        }
-
         body.projection-mode .clock-box h1 {
             font-size: 3.5rem !important;
             text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
@@ -50,17 +45,24 @@
             font-family: 'Inter', sans-serif;
             outline: none !important;
             -webkit-tap-highlight-color: transparent !important;
+            
+            /* Metin kopyalama ve seçmeyi tamamen engelleme */
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
         }
 
         *:focus {
             outline: none !important;
         }
 
-        body {
+        html, body {
+            height: 100vh;
+            overflow: hidden; /* Sayfanın kendisinin kaymasını tamamen kapatma */
             background-color: var(--bg-color);
             color: var(--text-main);
-            min-height: 100vh;
-            padding: 20px;
+            padding: 12px;
             background-image: 
                 radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
@@ -70,22 +72,33 @@
 
         .container {
             max-width: 1300px;
+            height: calc(100vh - 24px);
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
-            align-items: start; /* Sağ ve sol kolonların hizalanması */
+            grid-template-rows: auto 1fr;
+            gap: 12px;
         }
 
         @media (min-width: 992px) {
             .container {
                 grid-template-columns: 1.8fr 1.2fr;
+                grid-template-rows: 1fr;
             }
-            /* Sağ kolonun sabit kalması (Genel ilerleme durumunun kaybolmaması için) */
-            .right-column {
-                position: sticky;
-                top: 20px;
-            }
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
         }
 
         .card {
@@ -93,9 +106,17 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: 16px;
-            padding: 20px;
+            padding: 16px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+        }
+
+        .card.flex-grow-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-bottom: 0;
         }
 
         .header-card {
@@ -107,7 +128,7 @@
         }
 
         .clock-box h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
             letter-spacing: -1px;
             color: var(--accent-blue);
@@ -115,7 +136,7 @@
 
         .clock-box p {
             color: var(--text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .top-controls {
@@ -129,13 +150,13 @@
             background: rgba(239, 68, 68, 0.2);
             border: 2px solid var(--accent-red);
             border-radius: 14px;
-            padding: 20px;
+            padding: 14px;
             display: none;
             align-items: center;
             justify-content: space-between;
             gap: 15px;
             animation: alarmPulse 1s infinite alternate;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .alarm-banner.active {
@@ -151,10 +172,10 @@
             background: var(--accent-red);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 10px;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.95rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -164,9 +185,9 @@
 
         /* LİSTE VE BÖLÜMLER */
         .section-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: var(--accent-blue);
-            margin: 15px 0 8px 0;
+            margin: 12px 0 6px 0;
             padding-bottom: 4px;
             border-bottom: 1px solid var(--card-border);
             display: flex;
@@ -174,11 +195,12 @@
             gap: 8px;
         }
 
+        /* Sadece Kart İçi Kaydırma Alanı */
         .scroll-area {
-            max-height: 550px;
+            flex: 1;
             overflow-y: auto;
-            padding-right: 5px;
-            scroll-behavior: auto;
+            padding-right: 6px;
+            -webkit-overflow-scrolling: touch; /* Tabletlerde akıcı dokunmatik kaydırma */
         }
 
         .routine-item {
@@ -188,8 +210,8 @@
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
             border-radius: 10px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
             transition: all 0.2s;
         }
 
@@ -211,22 +233,22 @@
         .item-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .item-time {
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             color: var(--accent-purple);
             background: rgba(168, 85, 247, 0.12);
             padding: 4px 8px;
             border-radius: 6px;
-            min-width: 85px;
+            min-width: 80px;
             text-align: center;
         }
 
         .item-title {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
         }
 
@@ -234,8 +256,8 @@
             background: transparent;
             border: 2px solid var(--card-border);
             color: white;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 6px;
             cursor: pointer;
             display: flex;
@@ -256,16 +278,16 @@
         }
 
         .pomo-timer {
-            font-size: 3rem;
+            font-size: 2.8rem;
             font-weight: 700;
-            margin: 10px 0;
+            margin: 6px 0;
             letter-spacing: 2px;
             color: var(--accent-purple);
         }
 
         /* BUTONLAR VE İSTATİSTİK */
         .btn {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 8px;
             border: 1px solid var(--card-border);
             background: rgba(255, 255, 255, 0.05);
@@ -295,34 +317,34 @@
             border: 1px solid rgba(239, 68, 68, 0.4);
             width: 100%;
             justify-content: center;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .stat-box {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--card-border);
-            padding: 10px 6px;
+            padding: 8px 4px;
             border-radius: 10px;
             text-align: center;
         }
 
         .stat-value {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--accent-blue);
         }
 
         .stat-label {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: var(--text-muted);
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .progress-bar {
@@ -331,7 +353,7 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         .progress-fill {
@@ -345,19 +367,20 @@
         .tab-header {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .tab-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--card-border);
             color: var(--text-muted);
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.85rem;
         }
 
         .tab-btn.active {
@@ -368,17 +391,20 @@
 
         .tab-content {
             display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
         }
 
         .tab-content.active {
-            display: block;
+            display: flex;
         }
 
         .audio-test-row {
             display: flex;
             gap: 10px;
-            margin-top: 12px;
-            padding-top: 12px;
+            margin-top: 10px;
+            padding-top: 10px;
             border-top: 1px solid var(--card-border);
         }
     </style>
@@ -386,8 +412,8 @@
 <body id="body">
 
 <div class="container">
-    <!-- SOL KOLON: SEKMEDELİ İÇERİK -->
-    <div>
+    <!-- SOL KOLON: RUTİN VE EĞİTİMLER -->
+    <div class="left-column">
         <div class="card header-card">
             <div class="clock-box">
                 <h1 id="clock">00:00:00</h1>
@@ -406,10 +432,10 @@
         <!-- ALARM BANNERİ -->
         <div class="alarm-banner" id="alarm-banner">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <i data-lucide="bell-ring" style="color: white; width: 32px; height: 32px;"></i>
+                <i data-lucide="bell-ring" style="color: white; width: 28px; height: 28px;"></i>
                 <div>
-                    <strong style="font-size:1.1rem; color:white;">Süre Doldu!</strong>
-                    <p style="font-size:0.85rem; color: #fecaca;">Alarm çalıyor. Alarmı kapatabilirsin.</p>
+                    <strong style="font-size:1rem; color:white;">Süre Doldu!</strong>
+                    <p style="font-size:0.8rem; color: #fecaca;">Alarm çalıyor. Alarmı kapatabilirsin.</p>
                 </div>
             </div>
             <button class="btn-stop-alarm" id="btn-stop-alarm">
@@ -417,43 +443,43 @@
             </button>
         </div>
 
-        <div class="card">
+        <div class="card flex-grow-card">
             <div class="tab-header">
-                <button class="tab-btn active" onclick="switchTab('routine')"><i data-lucide="clock"></i> Günlük Rutin (Pomodoro Bölümlü)</button>
+                <button class="tab-btn active" onclick="switchTab('routine')"><i data-lucide="clock"></i> Günlük Rutin</button>
                 <button class="tab-btn" onclick="switchTab('courses')"><i data-lucide="book-open"></i> Eğitim Planı (157 Ders)</button>
             </div>
 
             <div id="tab-routine" class="tab-content active">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="color: var(--accent-blue);">Pazartesi / Pomodoro Akışı</h3>
-                    <button class="btn" id="reset-routine-btn" style="padding: 4px 10px; font-size: 0.8rem;"><i data-lucide="rotate-ccw"></i> Rutini Sıfırla</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="color: var(--accent-blue); font-size: 0.95rem;">Pazartesi / Pomodoro Akışı</h3>
+                    <button class="btn" id="reset-routine-btn" style="padding: 3px 8px; font-size: 0.75rem;"><i data-lucide="rotate-ccw"></i> Rutini Sıfırla</button>
                 </div>
                 <div class="scroll-area" id="routine-container"></div>
             </div>
 
             <div id="tab-courses" class="tab-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="color: var(--accent-blue);">Tüm Modül ve Dersler</h3>
-                    <button class="btn" id="reset-courses-btn" style="padding: 4px 10px; font-size: 0.8rem;"><i data-lucide="rotate-ccw"></i> Eğitimleri Sıfırla</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <h3 style="color: var(--accent-blue); font-size: 0.95rem;">Tüm Modül ve Dersler</h3>
+                    <button class="btn" id="reset-courses-btn" style="padding: 3px 8px; font-size: 0.75rem;"><i data-lucide="rotate-ccw"></i> Eğitimleri Sıfırla</button>
                 </div>
                 <div class="scroll-area" id="course-container"></div>
             </div>
         </div>
     </div>
 
-    <!-- SAĞ KOLON: AKILLI POMODORO VE İSTATİSTİKLER (SABİT / STICKY) -->
+    <!-- SAĞ KOLON: SABİT POMODORO VE İSTATİSTİKLER -->
     <div class="right-column">
         <div class="card pomodoro-card">
             <div style="display: flex; justify-content: space-between; align-items: center; text-align: left;">
-                <h3 id="pomo-card-title"><i data-lucide="timer"></i> Yükleniyor...</h3>
-                <span id="pomo-mode-label" style="font-size: 0.85rem; color: var(--accent-purple); font-weight:600; white-space:nowrap;">Otomatik</span>
+                <h3 id="pomo-card-title" style="font-size: 1rem;"><i data-lucide="timer"></i> Yükleniyor...</h3>
+                <span id="pomo-mode-label" style="font-size: 0.8rem; color: var(--accent-purple); font-weight:600; white-space:nowrap;">Otomatik</span>
             </div>
             <div class="pomo-timer" id="pomo-display">00:00</div>
-            <p style="font-size: 0.8rem; color: var(--text-muted);" id="pomo-info-text">Saat dilimine göre tam otomatik çalışır.</p>
+            <p style="font-size: 0.75rem; color: var(--text-muted);" id="pomo-info-text">Saat dilimine göre tam otomatik çalışır.</p>
         </div>
 
-        <div class="card">
-            <h3><i data-lucide="bar-chart-3"></i> Genel İlerleme Durumu</h3>
+        <div class="card" style="flex: 1;">
+            <h3 style="font-size: 1rem;"><i data-lucide="bar-chart-3"></i> Genel İlerleme Durumu</h3>
             
             <div class="stats-grid">
                 <div class="stat-box">
@@ -470,8 +496,8 @@
                 </div>
             </div>
 
-            <div style="margin-top: 15px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <div style="margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
                     <span>Ders İlerleme Oranı</span>
                     <span id="progress-text">0%</span>
                 </div>
@@ -481,11 +507,11 @@
             </div>
 
             <div class="audio-test-row">
-                <button class="btn" id="test-notif-btn" style="flex: 1; justify-content: center;"><i data-lucide="play"></i> Bildirim Test</button>
-                <button class="btn" id="test-alarm-btn" style="flex: 1; justify-content: center;"><i data-lucide="play"></i> Alarm Test</button>
+                <button class="btn" id="test-notif-btn" style="flex: 1; justify-content: center; font-size: 0.8rem;"><i data-lucide="play"></i> Bildirim Test</button>
+                <button class="btn" id="test-alarm-btn" style="flex: 1; justify-content: center; font-size: 0.8rem;"><i data-lucide="play"></i> Alarm Test</button>
             </div>
 
-            <button class="btn btn-danger" id="clear-all-btn" style="margin-top: 15px;">
+            <button class="btn btn-danger" id="clear-all-btn" style="margin-top: 12px; font-size: 0.8rem;">
                 <i data-lucide="trash-2"></i> Tüm Verileri Sıfırla
             </button>
         </div>
@@ -510,7 +536,7 @@
     var isAlarmPlaying = false;
     var lastTriggeredSlotId = null;
 
-    // Tam Ekran Düğmesi (Samsung Tab 3 Lite Uyumluluğu)
+    // Tam Ekran Düğmesi (Samsung Tab 3 Lite Uyumlu)
     document.getElementById('fullscreen-btn').addEventListener('click', function() {
         var doc = document.documentElement;
         if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement) {
@@ -526,7 +552,7 @@
         }
     });
 
-    // Ses Çalma Fonksiyonu (Kesintisiz Sürekli Alarm Desteği)
+    // Ses Çalma Fonksiyonu (Kesintisiz Döngüsel Alarm)
     function playAudio(type) {
         if (!type) type = 'notif';
         var fileName = (type === 'alarm') ? 'alarm.mp3' : 'bildirim.mp3';
@@ -987,10 +1013,10 @@
         }
     }
 
-    // Otomatik Kaydırma (Sadece sekme değiştirildiğinde çalışır, sayfanın aşağı kaymasını engeller)
+    // Kart İçi Otomatik Kaydırma (Ekranı değil, sadece ilgili listeyi kaydırır)
     function scrollToActiveRoutine() {
         setTimeout(function() {
-            var activeRow = document.querySelector('.routine-item.active-pomo-row');
+            var activeRow = document.querySelector('#routine-container .routine-item.active-pomo-row');
             if (activeRow) {
                 try { activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
             }
@@ -1171,6 +1197,7 @@
     renderRoutine();
     renderCourses();
     updateClock();
+    scrollToActiveRoutine();
     document.addEventListener('visibilitychange', function() { if (!document.hidden) { updateClock(); } });
     window.addEventListener('pageshow', function() { updateClock(); });
 </script>
